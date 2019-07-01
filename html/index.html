@@ -1,0 +1,27 @@
+<html lang="en">
+<head>
+    <style>
+        body {
+            background-color: darkblue;
+        }
+
+        #display {
+            color: white;
+            font-family: monospace;
+        }
+    </style>
+    <title>MR report v0.0.1</title>
+</head>
+<body>
+<script id="logData" type="text/plain">{{ .LogData }}</script>
+
+<div>
+    <pre id="display"></pre>
+</div>
+<script>
+    const logData = document.getElementById('logData').innerHTML
+    const display = document.getElementById('display')
+    display.textContent = logData
+</script>
+</body>
+</html>
