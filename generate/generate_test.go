@@ -6,7 +6,7 @@ import (
 	"github.com/cf-platform-eng/mrreporter/generate"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"os"
+	. "github.com/onsi/gomega/gbytes"
 )
 
 var _ = Describe("Generate", func() {
@@ -17,9 +17,12 @@ var _ = Describe("Generate", func() {
 		`))
 
 		config := generate.GenerateOpt{}
-		result := config.Generate(logIn, os.Stdout)
+
+		output := NewBuffer()
+		result := config.Generate(logIn, output)
 
 		Expect(result).To(BeNil())
+		Expect(output).To(Say("this is the log"))
 	})
 
 	It("embeds the logging system", func() {
