@@ -1,4 +1,4 @@
-module github.com/cf-platform-eng/mrreporter
+module github.com/cf-platform-eng/mrreport
 
 go 1.12
 

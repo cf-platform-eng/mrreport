@@ -1,3 +1,3 @@
-package mrreporter
+package mrreport
 
-const APP_NAME = "mrreporter"
+const APP_NAME = "mrreport"

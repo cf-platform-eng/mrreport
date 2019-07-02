@@ -3,7 +3,7 @@ package generate_test
 import (
 	"bytes"
 	. "github.com/MakeNowJust/heredoc/dot"
-	"github.com/cf-platform-eng/mrreporter/generate"
+	"github.com/cf-platform-eng/mrreport/generate"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"

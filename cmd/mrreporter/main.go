@@ -2,16 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/cf-platform-eng/mrreporter"
-	"github.com/cf-platform-eng/mrreporter/generate"
+	"github.com/cf-platform-eng/mrreport"
+	"github.com/cf-platform-eng/mrreport/generate"
 	"os"
 
 	"github.com/jessevdk/go-flags"
 
-	"github.com/cf-platform-eng/mrreporter/version"
+	"github.com/cf-platform-eng/mrreport/version"
 )
 
-var config mrreporter.Config
+var config mrreport.Config
 var parser = flags.NewParser(&config, flags.Default)
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 	_, err = parser.AddCommand(
 		"version",
 		"print version",
-		fmt.Sprintf("print %s version", mrreporter.APP_NAME),
+		fmt.Sprintf("print %s version", mrreport.APP_NAME),
 		&version.VersionOpt{})
 	if err != nil {
 		fmt.Println("Could not add version command")

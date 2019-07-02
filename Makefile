@@ -31,24 +31,24 @@ SRC = $(shell find . -name "*.go" | grep -v "_test\." )
 
 VERSION := $(or $(VERSION), "dev")
 
-LDFLAGS="-X github.com/cf-platform-eng/mrreporter/version.Version=$(VERSION)"
+LDFLAGS="-X github.com/cf-platform-eng/mrreport/version.Version=$(VERSION)"
 
-build/mrreporter: $(SRC) deps
-	go build -o build/mrreporter -ldflags ${LDFLAGS} ./cmd/mrreporter/main.go
+build/mrreport: $(SRC) deps
+	go build -o build/mrreport -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
 
-build: build/mrreporter
+build: build/mrreport
 
 build-all: build-linux build-darwin
 
 build-linux: build/tileinspect-linux
 
 build/tileinspect-linux:
-	GOARCH=amd64 GOOS=linux go build -o build/mrreporter-linux -ldflags ${LDFLAGS} ./cmd/mrreporter/main.go
+	GOARCH=amd64 GOOS=linux go build -o build/mrreport-linux -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
 
 build-darwin: build/tileinspect-darwin
 
 build/tileinspect-darwin:
-	GOARCH=amd64 GOOS=darwin go build -o build/tileinspect-darwin -ldflags ${LDFLAGS} ./cmd/mrreporter/main.go
+	GOARCH=amd64 GOOS=darwin go build -o build/tileinspect-darwin -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
 
 test: deps lint
 	ginkgo -r .
