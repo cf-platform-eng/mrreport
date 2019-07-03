@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
+	"text/template"
 )
 
 //go:generate counterfeiter io.Reader
@@ -17,6 +18,10 @@ var _ = Describe("Generate", func() {
 	var (
 		command *generate.GenerateCommand
 	)
+
+	BeforeEach(func() {
+	    command = generate.NewGenerateCommand()
+	})
 
 	Context("reader has logging data", func() {
 		var (
@@ -59,6 +64,26 @@ var _ = Describe("Generate", func() {
 		})
 	})
 
-	Context("Packr cannot find index.html", func() {
+	Context("packr box cannot find index.html", func() {
+		BeforeEach(func() {
+			box := &generatefakes.FakeBox{}
+
+			box.FindStringReturns("", errors.New("find string error"))
+
+			command = &generate.GenerateCommand{
+				Box: box,
+				HTMLTemplate: template.New("html"),
+			}
+		})
+
+		It("returns an error", func() {
+			output := NewBuffer()
+			err := command.Generate(bytes.NewBufferString("log"), output)
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("packr could not find index.html"))
+			Expect(err.Error()).To(ContainSubstring("find string error"))
+
+		})
 	})
 })

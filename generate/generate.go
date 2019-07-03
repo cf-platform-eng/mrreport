@@ -9,7 +9,21 @@ import (
 	"text/template"
 )
 
+//go:generate counterfeiter Box
+type Box interface {
+	FindString(name string) (string, error)
+}
+
 type GenerateCommand struct {
+	Box          Box
+	HTMLTemplate *template.Template
+}
+
+func NewGenerateCommand() *GenerateCommand {
+	return &GenerateCommand{
+		Box: packr.New("Report", "../html"),
+		HTMLTemplate: template.New("html"),
+	}
 }
 
 type templateVariables struct {
@@ -22,17 +36,12 @@ func (cmd *GenerateCommand) Generate(in io.Reader, out io.WriteCloser) error {
 		return errors.Wrap(err, "error reading from stdin")
 	}
 
-	box := packr.New("Report", "../html")
-	html, err := box.FindString("index.html")
-	// !branch-not-tested requires dep injection of a static, immutable in-memory db
+	html, err := cmd.Box.FindString("index.html")
 	if err != nil {
 		return errors.Wrap(err, "packr could not find index.html")
 	}
 
-	htmlTemplate, err := template.New("html").Parse(html)
-	if err != nil {
-		return err
-	}
+	htmlTemplate, err := cmd.HTMLTemplate.Parse(html)
 
 	vars := &templateVariables{string(logData)}
 	_ = htmlTemplate.Execute(out, vars)
