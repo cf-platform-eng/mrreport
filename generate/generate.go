@@ -14,9 +14,15 @@ type Box interface {
 	FindString(name string) (string, error)
 }
 
+//go:generate counterfeiter Template
+type Template interface {
+	Execute(wr io.Writer, data interface{}) error
+	Parse(text string) (*template.Template, error)
+}
+
 type GenerateCommand struct {
 	Box          Box
-	HTMLTemplate *template.Template
+	HTMLTemplate Template
 }
 
 func NewGenerateCommand() *GenerateCommand {

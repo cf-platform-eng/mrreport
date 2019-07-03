@@ -6,6 +6,7 @@ import (
 	. "github.com/MakeNowJust/heredoc/dot"
 	"github.com/cf-platform-eng/mrreport/generate"
 	"github.com/cf-platform-eng/mrreport/generate/generatefakes"
+	"github.com/gobuffalo/packr/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
@@ -20,7 +21,7 @@ var _ = Describe("Generate", func() {
 	)
 
 	BeforeEach(func() {
-	    command = generate.NewGenerateCommand()
+		command = generate.NewGenerateCommand()
 	})
 
 	Context("reader has logging data", func() {
@@ -71,7 +72,7 @@ var _ = Describe("Generate", func() {
 			box.FindStringReturns("", errors.New("find string error"))
 
 			command = &generate.GenerateCommand{
-				Box: box,
+				Box:          box,
 				HTMLTemplate: template.New("html"),
 			}
 		})
@@ -83,7 +84,24 @@ var _ = Describe("Generate", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("packr could not find index.html"))
 			Expect(err.Error()).To(ContainSubstring("find string error"))
-
 		})
 	})
+
+	Context("index.html has a template error", func() {
+		BeforeEach(func() {
+
+			command = &generate.GenerateCommand{
+				Box: packr.New("Report", "../html"),
+				HTMLTemplate: &generatefakes.FakeTemplate{},
+			}
+		})
+
+		It("returns an error", func() {
+			output := NewBuffer()
+			err := command.Generate(bytes.NewBufferString("log"), output)
+
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
 })
