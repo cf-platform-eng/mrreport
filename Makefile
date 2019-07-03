@@ -17,7 +17,10 @@ ifndef HAS_GO_IMPORTS
 endif
 
 # #### CLEAN ####
-clean: deps-go-binary
+clean-packr: deps-packr
+	packr2 clean
+
+clean: deps-go-binary clean-packr
 	rm -rf build/*
 	go clean --modcache
 
@@ -26,9 +29,13 @@ deps-modules: deps-goimports deps-go-binary
 	go mod download
 
 deps-packr: deps-modules
-	go get -u github.com/gobuffalo/packr/v2/packr2
+	command -v packr2 >/dev/null 2>&1 || go get -u github.com/gobuffalo/packr/v2/packr2
 
-deps: deps-modules deps-packr
+deps-counterfeiter: deps-modules
+	command -v counterfeiter >/dev/null 2>&1 || go get -u github.com/maxbrunsfeld/counterfeiter/v6
+
+
+deps: deps-modules deps-packr deps-counterfeiter
 
 # #### BUILD ####
 SRC = $(shell find . -name "*.go" | grep -v "_test\." )

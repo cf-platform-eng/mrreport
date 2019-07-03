@@ -2,38 +2,45 @@ package generate
 
 import (
 	"github.com/gobuffalo/packr/v2"
+	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"os"
+	"text/template"
 )
 
-type GenerateOpt struct {
-
+type GenerateCommand struct {
 }
 
-func (cmd *GenerateOpt) Generate(in io.Reader, out io.WriteCloser) error {
-	_, err := ioutil.ReadAll(in)
+type templateVariables struct {
+	LogData string
+}
+
+func (cmd *GenerateCommand) Generate(in io.Reader, out io.WriteCloser) error {
+	logData, err := ioutil.ReadAll(in)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error reading from stdin")
 	}
 
 	box := packr.New("Report", "../html")
-	index, err := box.Find("index.html")
+	html, err := box.FindString("index.html")
+	// !branch-not-tested requires dep injection of a static, immutable in-memory db
+	if err != nil {
+		return errors.Wrap(err, "packr could not find index.html")
+	}
 
-	_, err = out.Write(index)
+	htmlTemplate, err := template.New("html").Parse(html)
 	if err != nil {
 		return err
 	}
 
-	err = out.Close()
-	if err != nil {
-		return err
-	}
+	vars := &templateVariables{string(logData)}
+	_ = htmlTemplate.Execute(out, vars)
+	_ = out.Close()
 
 	return nil
 }
 
-func (cmd *GenerateOpt) Execute(args []string) error {
+func (cmd *GenerateCommand) Execute(args []string) error {
 	return cmd.Generate(os.Stdin, os.Stdout)
 }
-
