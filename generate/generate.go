@@ -1,12 +1,13 @@
 package generate
 
 import (
-	"github.com/gobuffalo/packr/v2"
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"os"
 	"text/template"
+
+	"github.com/gobuffalo/packr/v2"
+	"github.com/pkg/errors"
 )
 
 //go:generate counterfeiter Box
@@ -21,7 +22,7 @@ type GenerateCommand struct {
 
 func NewGenerateCommand() *GenerateCommand {
 	return &GenerateCommand{
-		Box: packr.New("Report", "../html"),
+		Box:          packr.New("Report", "../html"),
 		HTMLTemplate: template.New("html"),
 	}
 }
@@ -45,7 +46,6 @@ func (cmd *GenerateCommand) Generate(in io.Reader, out io.WriteCloser) error {
 	if err != nil {
 		return errors.Wrap(err, "could not parse index.html template")
 	}
-
 
 	vars := &templateVariables{string(logData)}
 	err = htmlTemplate.Execute(out, vars)

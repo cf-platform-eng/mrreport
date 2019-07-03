@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/cf-platform-eng/mrreport"
 	"github.com/cf-platform-eng/mrreport/generate"
-	"os"
 
 	"github.com/jessevdk/go-flags"
 

@@ -3,13 +3,14 @@ package generate_test
 import (
 	"bytes"
 	"errors"
+	"text/template"
+
 	. "github.com/MakeNowJust/heredoc/dot"
 	"github.com/cf-platform-eng/mrreport/generate"
 	"github.com/cf-platform-eng/mrreport/generate/generatefakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
-	"text/template"
 )
 
 //go:generate counterfeiter io.Reader
@@ -21,7 +22,7 @@ var _ = Describe("Generate", func() {
 	)
 
 	BeforeEach(func() {
-	    command = generate.NewGenerateCommand()
+		command = generate.NewGenerateCommand()
 	})
 
 	Context("reader has logging data", func() {
@@ -72,7 +73,7 @@ var _ = Describe("Generate", func() {
 			box.FindStringReturns("", errors.New("find string error"))
 
 			command = &generate.GenerateCommand{
-				Box: box,
+				Box:          box,
 				HTMLTemplate: template.New("html"),
 			}
 		})
