@@ -20,7 +20,7 @@ func main() {
 		"generate",
 		"generate the report",
 		"generate a report from your test-case logging",
-		&generate.GenerateCommand{})
+		generate.NewGenerateCommand())
 	if err != nil {
 		fmt.Println("Could not add generate command")
 		os.Exit(1)
