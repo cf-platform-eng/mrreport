@@ -11,7 +11,7 @@ import (
 
 var _ = Describe("Generate", func() {
 	It("inserts the log as a variable", func() {
-		logIn := bytes.NewBufferString(D(`
+		logText := bytes.NewBufferString(D(`
 			this is the log
 			it has multiple lines
 		`))
@@ -19,7 +19,7 @@ var _ = Describe("Generate", func() {
 		config := generate.GenerateOpt{}
 
 		output := NewBuffer()
-		result := config.Generate(logIn, output)
+		result := config.Generate(logText, output)
 
 		Expect(result).To(BeNil())
 		Expect(output).To(Say("this is the log"))
