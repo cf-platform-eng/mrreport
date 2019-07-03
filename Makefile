@@ -9,7 +9,6 @@ deps-go-binary:
 		echo "Actual: $$(go version)" && \
 	 	go version | grep $(GO-VER) > /dev/null
 
-
 HAS_GO_IMPORTS := $(shell command -v goimports;)
 
 deps-goimports: deps-go-binary
@@ -23,8 +22,13 @@ clean: deps-go-binary
 	go clean --modcache
 
 # #### DEPS ####
-deps: deps-goimports deps-go-binary
+deps-modules: deps-goimports deps-go-binary
 	go mod download
+
+deps-packr: deps-modules
+	go get -u github.com/gobuffalo/packr/v2/packr2
+
+deps: deps-modules deps-packr
 
 # #### BUILD ####
 SRC = $(shell find . -name "*.go" | grep -v "_test\." )
