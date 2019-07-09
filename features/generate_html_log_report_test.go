@@ -33,7 +33,6 @@ var _ = Describe("Generate HTML log", func() {
 		Expect(page.Destroy()).To(Succeed())
 	})
 
-
 	Scenario("Happy path, log contains simple text", func() {
 		steps.Given("the mrreport command is built")
 		steps.And("a log output as a stream")

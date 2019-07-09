@@ -36,5 +36,3 @@ func serveDocument(document string) *httptest.Server {
 
 	return testServer
 }
-
-
