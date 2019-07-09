@@ -3,7 +3,7 @@ package generate_test
 import (
 	"bytes"
 	"errors"
-	"text/template"
+	"html/template"
 
 	. "github.com/MakeNowJust/heredoc/dot"
 	"github.com/cf-platform-eng/mrreport/generate"
@@ -34,6 +34,7 @@ var _ = Describe("Generate", func() {
 			reader = bytes.NewBufferString(D(`
 				this is the log
 				it has multiple lines
+				<p>and some html</p>
 			`))
 		})
 
@@ -43,6 +44,8 @@ var _ = Describe("Generate", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(output).To(Say("this is the log"))
+			Expect(output).To(Say("it has multiple lines"))
+			Expect(output).To(Say("&lt;p&gt;and some html&lt;/p&gt;"))
 		})
 	})
 

@@ -1,10 +1,10 @@
 package generate
 
 import (
+	"html/template"
 	"io"
 	"io/ioutil"
 	"os"
-	"text/template"
 
 	"github.com/gobuffalo/packr/v2"
 	"github.com/pkg/errors"

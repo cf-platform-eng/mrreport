@@ -4,7 +4,6 @@ package features_test
 
 import (
 	"bytes"
-	"fmt"
 	"os/exec"
 
 	. "github.com/MakeNowJust/heredoc/dot"
@@ -36,21 +35,22 @@ var _ = Describe("Generate HTML log", func() {
 
 	Scenario("Log contains simple text", func() {
 		steps.Given("the mrreport command is built")
-		steps.And("a log output as a stream")
+		steps.And("a simple log output as a stream")
 		steps.When("I pipe the log output into the generate command")
 
 		steps.Then("the command exits without error")
-		steps.And("the result is on stdout")
-		steps.And("the result is a html page displaying the log")
+		steps.And("the result including the simple log is on stdout")
+		steps.And("the result is a html page displaying the simple log")
 	})
 
-	Scenario("Log escapes html entities that won't render correctly in a pre tag", func() {
+	Scenario("Log contains an end-script tag", func() {
 		steps.Given("the mrreport command is built")
-		steps.And("a log output with less-than and ampersands")
+		steps.And("a log output with an end-script tag, as a stream")
 		steps.When("I pipe the log output into the generate command")
 
 		steps.Then("the command exits without error")
-		steps.And("the result is a html page displaying the escaped log")
+		steps.And("the result including the end-script tag is on stdout")
+		steps.And("the result is a html page displaying the end-script tag and the rest of the log")
 	})
 
 	steps.Define(func(define Definitions) {
@@ -68,16 +68,16 @@ var _ = Describe("Generate HTML log", func() {
 			gexec.CleanupBuildArtifacts()
 		})
 
-		define.Given(`^a log output as a stream$`, func() {
+		define.Given(`^a simple log output as a stream$`, func() {
 			logStream = bytes.NewBufferString(D(`
 				this is the log
 				it has multiple lines
 			`))
 		})
 
-		define.Given(`^a log output with less-than and ampersands$`, func() {
+		define.Given(`^a log output with an end-script tag, as a stream$`, func() {
 			logStream = bytes.NewBufferString(
-				D(`This log tells you about some <pre id="not_in_doc">html you need</pre>`))
+				D(`</script>This log tells you about some <pre id="not_in_doc">html you need</pre>`))
 		})
 
 		define.When(`^I pipe the log output into the generate command$`, func() {
@@ -92,12 +92,17 @@ var _ = Describe("Generate HTML log", func() {
 			Eventually(commandSession).Should(gexec.Exit(0))
 		})
 
-		define.Then(`^the result is on stdout$`, func() {
+		define.Then(`^the result including the simple log is on stdout$`, func() {
 			Eventually(commandSession.Out).Should(Say("this is the log"))
 			Eventually(commandSession.Out).Should(Say("it has multiple lines"))
 		})
 
-		define.Then(`^the result is a html page displaying the log$`, func() {
+		define.Then(`^the result including the end-script tag is on stdout$`, func() {
+			Eventually(commandSession.Out).Should(Say(
+				"&lt;/script&gt;This log tells you about some &lt;pre id=&#34;not_in_doc&#34;&gt;html you need&lt;/pre&gt;"))
+		})
+
+		define.Then(`^the result is a html page displaying the simple log$`, func() {
 			html := string(commandSession.Out.Contents())
 
 			server := serveDocument(html)
@@ -107,15 +112,15 @@ var _ = Describe("Generate HTML log", func() {
 			Expect(page.Find("#display")).To(matchers.HaveText("this is the log\nit has multiple lines"))
 		})
 
-		define.Then(`^the result is a html page displaying the escaped log$`, func() {
+		define.Then(`^the result is a html page displaying the end-script tag and the rest of the log$`, func() {
 			html := string(commandSession.Out.Contents())
-			fmt.Println(html)
 
 			server := serveDocument(html)
 			defer server.Close()
 
 			Expect(page.Navigate(server.URL)).To(Succeed())
-			Expect(page.All("#not_in_doc").Count()).Should(Equal(0))
+			Expect(page.Find("#display")).To(
+				matchers.HaveText("</script>This log tells you about some <pre id=\"not_in_doc\">html you need</pre>"))
 		})
 	})
 })
