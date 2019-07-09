@@ -12,26 +12,11 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
-	"github.com/sclevine/agouti"
 	"github.com/sclevine/agouti/matchers"
 )
 
 var _ = Describe("Generate HTML log", func() {
 	steps := NewSteps()
-
-	var (
-		page *agouti.Page
-	)
-
-	BeforeEach(func() {
-		var err error
-		page, err = agoutiDriver.NewPage()
-		Expect(err).NotTo(HaveOccurred())
-	})
-
-	AfterEach(func() {
-		Expect(page.Destroy()).To(Succeed())
-	})
 
 	Scenario("Log contains simple text", func() {
 		steps.Given("the mrreport command is built")
