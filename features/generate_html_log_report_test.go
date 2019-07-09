@@ -4,6 +4,7 @@ package features_test
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 
 	. "github.com/MakeNowJust/heredoc/dot"
@@ -33,7 +34,7 @@ var _ = Describe("Generate HTML log", func() {
 		Expect(page.Destroy()).To(Succeed())
 	})
 
-	Scenario("Happy path, log contains simple text", func() {
+	Scenario("Log contains simple text", func() {
 		steps.Given("the mrreport command is built")
 		steps.And("a log output as a stream")
 		steps.When("I pipe the log output into the generate command")
@@ -41,6 +42,15 @@ var _ = Describe("Generate HTML log", func() {
 		steps.Then("the command exits without error")
 		steps.And("the result is on stdout")
 		steps.And("the result is a html page displaying the log")
+	})
+
+	Scenario("Log escapes html entities that won't render correctly in a pre tag", func() {
+		steps.Given("the mrreport command is built")
+		steps.And("a log output with less-than and ampersands")
+		steps.When("I pipe the log output into the generate command")
+
+		steps.Then("the command exits without error")
+		steps.And("the result is a html page displaying the escaped log")
 	})
 
 	steps.Define(func(define Definitions) {
@@ -63,6 +73,11 @@ var _ = Describe("Generate HTML log", func() {
 				this is the log
 				it has multiple lines
 			`))
+		})
+
+		define.Given(`^a log output with less-than and ampersands$`, func() {
+			logStream = bytes.NewBufferString(
+				D(`This log tells you about some <pre id="not_in_doc">html you need</pre>`))
 		})
 
 		define.When(`^I pipe the log output into the generate command$`, func() {
@@ -90,6 +105,17 @@ var _ = Describe("Generate HTML log", func() {
 
 			Expect(page.Navigate(server.URL)).To(Succeed())
 			Expect(page.Find("#display")).To(matchers.HaveText("this is the log\nit has multiple lines"))
+		})
+
+		define.Then(`^the result is a html page displaying the escaped log$`, func() {
+			html := string(commandSession.Out.Contents())
+			fmt.Println(html)
+
+			server := serveDocument(html)
+			defer server.Close()
+
+			Expect(page.Navigate(server.URL)).To(Succeed())
+			Expect(page.All("#not_in_doc").Count()).Should(Equal(0))
 		})
 	})
 })
