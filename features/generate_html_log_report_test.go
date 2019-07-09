@@ -90,7 +90,6 @@ var _ = Describe("Generate HTML log", func() {
 
 			Expect(page.Navigate(server.URL)).To(Succeed())
 			Expect(page.Find("#display")).To(matchers.HaveText("this is the log\nit has multiple lines"))
-		}, func() {
 		})
 	})
 })
