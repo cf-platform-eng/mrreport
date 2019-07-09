@@ -4,6 +4,9 @@ platform: linux
 inputs:
   - name: source
 
+params:
+  CI: true
+
 run:
   path: make
   dir: source

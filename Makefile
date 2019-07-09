@@ -51,15 +51,15 @@ build: build/mrreport
 
 build-all: build-linux build-darwin
 
-build-linux: build/tileinspect-linux
+build-linux: build/mrreport-linux
 
-build/tileinspect-linux:
+build/mrreport-linux:
 	GOARCH=amd64 GOOS=linux go build -o build/mrreport-linux -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
 
-build-darwin: build/tileinspect-darwin
+build-darwin: build/mrreport-darwin
 
-build/tileinspect-darwin:
-	GOARCH=amd64 GOOS=darwin go build -o build/tileinspect-darwin -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
+build/mrreport-darwin:
+	GOARCH=amd64 GOOS=darwin go build -o build/mrreport-darwin -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
 
 units: deps
 	ginkgo -r -skipPackage features .
