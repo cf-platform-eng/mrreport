@@ -7,11 +7,11 @@ inputs:
 
 run:
   path: /bin/bash
-  dir: source
   args:
     - -exc
     - |
       export VERSION=$(cat version/version)
+      cd source
       make build-all
 
 outputs:
