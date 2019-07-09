@@ -61,8 +61,13 @@ build-darwin: build/tileinspect-darwin
 build/tileinspect-darwin:
 	GOARCH=amd64 GOOS=darwin go build -o build/tileinspect-darwin -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
 
-test: deps lint
-	ginkgo -r .
+units: deps
+	ginkgo -r -skipPackage features .
+
+features: deps
+	ginkgo -r -tags=feature features
+
+test: deps lint units features
 
 lint: deps-goimports
 	git ls-files | grep '.go$$' | xargs goimports -l -w
