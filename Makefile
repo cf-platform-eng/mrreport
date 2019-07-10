@@ -45,22 +45,28 @@ VERSION := $(or $(VERSION), "dev")
 LDFLAGS="-X github.com/cf-platform-eng/mrreport/version.Version=$(VERSION)"
 
 build/mrreport: $(SRC) deps
+	packr2 build
 	go build -o build/mrreport -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
 
 build: build/mrreport
 
-build-all: build-linux build-darwin
+
+build/mrreport-linux:
+	packr2 build
+	GOARCH=amd64 GOOS=linux go build -o build/mrreport-linux -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
 
 build-linux: build/mrreport-linux
 
-build/mrreport-linux:
-	GOARCH=amd64 GOOS=linux go build -o build/mrreport-linux -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
+build/mrreport-darwin:
+	packr2 build
+	GOARCH=amd64 GOOS=darwin go build -o build/mrreport-darwin -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
 
 build-darwin: build/mrreport-darwin
 
-build/mrreport-darwin:
-	GOARCH=amd64 GOOS=darwin go build -o build/mrreport-darwin -ldflags ${LDFLAGS} ./cmd/mrreport/main.go
+build-all: build-linux build-darwin
 
+
+# #### TESTS ####
 units: deps
 	ginkgo -r -skipPackage features .
 
