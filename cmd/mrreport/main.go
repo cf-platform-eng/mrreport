@@ -5,11 +5,11 @@ import (
 	"os"
 
 	"github.com/cf-platform-eng/mrreport"
+	"github.com/cf-platform-eng/mrreport/dependencies"
 	"github.com/cf-platform-eng/mrreport/generate"
+	"github.com/cf-platform-eng/mrreport/version"
 
 	"github.com/jessevdk/go-flags"
-
-	"github.com/cf-platform-eng/mrreport/version"
 )
 
 var config mrreport.Config
@@ -17,6 +17,16 @@ var parser = flags.NewParser(&config, flags.Default)
 
 func main() {
 	_, err := parser.AddCommand(
+		"dependencies",
+		"show logged dependencies",
+		"filter the logs to show only the dependencies",
+		&dependencies.DependenciesCommand{})
+	if err != nil {
+		fmt.Println("Could not add dependencies command")
+		os.Exit(1)
+	}
+
+	_, err = parser.AddCommand(
 		"generate",
 		"generate the report",
 		"generate a report from your test-case logging",
