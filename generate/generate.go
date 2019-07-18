@@ -28,7 +28,8 @@ func NewGenerateCommand() *GenerateCommand {
 }
 
 type templateVariables struct {
-	LogData string
+	LogData       string
+	PresenterCode template.JS
 }
 
 func (cmd *GenerateCommand) Generate(in io.Reader, out io.WriteCloser) error {
@@ -42,12 +43,20 @@ func (cmd *GenerateCommand) Generate(in io.Reader, out io.WriteCloser) error {
 		return errors.Wrap(err, "packr could not find index.html")
 	}
 
+	js, err := cmd.Box.FindString("presenter.js")
+	if err != nil {
+		return errors.Wrap(err, "packr could not find presenter.js")
+	}
+
 	htmlTemplate, err := cmd.HTMLTemplate.Parse(html)
 	if err != nil {
 		return errors.Wrap(err, "could not parse index.html template")
 	}
 
-	vars := &templateVariables{string(logData)}
+	vars := &templateVariables{
+		LogData:       string(logData),
+		PresenterCode: template.JS(js),
+	}
 	err = htmlTemplate.Execute(out, vars)
 	if err != nil { // !branch-not-tested we know of no way for this to occur.
 		return errors.Wrap(err, "highly unexpected error")
