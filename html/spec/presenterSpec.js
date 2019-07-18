@@ -1,21 +1,23 @@
 const fs = require("fs");
 const { promisify } = require("util");
 const readFile = promisify(fs.readFile);
+let presenter = require("../presenter.js");
 
 document = {
     getElementById: (elementId) => {}
 };
 
-describe("the presenter", () => {
+describe("injectElements", () => {
     let logDataElement = {};
     let displayElement = {
-        get innerHTML() {},
-        set innerHTML(v) {},
+        get innerHTML() {
+        },
+        set innerHTML(v) {
+        },
     };
 
     let getElementById;
     let displayInnerHTML;
-    let presenter = require("../presenter.js");
 
     beforeEach(() => {
         displayInnerHTML = spyOnProperty(displayElement, "innerHTML", "set");
@@ -31,7 +33,9 @@ describe("the presenter", () => {
         expect(getElementById).toHaveBeenCalledWith("display");
         expect(displayInnerHTML).toHaveBeenCalledWith("this is my log");
     });
+});
 
+describe("parseLogData", () => {
     describe("when there are sections", () => {
         let rawLogData;
         beforeEach(async () => {

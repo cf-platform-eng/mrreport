@@ -7,21 +7,23 @@ const presenter = {
 
     parseLogData: (input) => {
         let regex = /section-start: '(.+)' MRL:({.+})((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+})/gm;
-        let matches = [];
+        let sections = [];
         let m;
 
         while ((m = regex.exec(input)) !== null) {
-            var name = m[1];
-            var startMrl = m[2];
-            var contents = m[3];
-            var statusCode = m[6];
-            var endMrl = m[7];
-            var sections = presenter.parseLogData(contents);
-        
-            matches.push({ name, startMrl, contents, sections, statusCode, endMrl });
+            let contents = m[3];
+            let section = {
+                name: m[1],
+                startMrl: m[2],
+                contents,
+                statusCode: m[6],
+                endMrl: m[7],
+                sections: presenter.parseLogData(contents)
+            };
+            sections.push(section);
         }
 
-        return matches;
+        return sections;
     }
 };
 
