@@ -30,11 +30,16 @@ hello from the middle of two nested objects
 
 section-start: 'nestedpull2' MRL:{"type":"section-start","name":"nestedpull","time":"2019-07-18T10:21:12.130296141-04:00"}
 section-start: 'twicenestedpull' MRL:{"type":"section-start","name":"twicenestedpull","time":"2019-07-18T10:21:12.130296141-04:00"}
-
 UUDDLRLRBA1
 section-end: 'twicenestedpull' result: 3 MRL:{"type":"section-end","name":"twicenestedpull","time":"2019-07-18T10:21:23.444186449-04:00"}
 section-end: 'nestedpull2' result: 3 MRL:{"type":"section-end","name":"nestedpull","time":"2019-07-18T10:21:23.444186449-04:00"}
 
+
+section-start: 'nestedpull3' MRL:{"type":"section-start","name":"nestedpull","time":"2019-07-18T10:21:12.130296141-04:00"}
+section-start: 'twicenestedpull' MRL:{"type":"section-start","name":"twicenestedpull","time":"2019-07-18T10:21:12.130296141-04:00"}
+UUDDLRLRBA1
+section-end: 'twicenestedpull' result: 3 MRL:{"type":"section-end","name":"twicenestedpull","time":"2019-07-18T10:21:23.444186449-04:00"}
+section-end: 'nestedpull3' result: 3 MRL:{"type":"section-end","name":"nestedpull","time":"2019-07-18T10:21:23.444186449-04:00"}
 
 Successfully pulled amidos/dcind@sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561.
 section-end: 'pull' result: 0 MRL:{"type":"section-end","time":"2019-07-18T10:21:23.444186449-04:00"}

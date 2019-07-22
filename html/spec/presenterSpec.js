@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { promisify } = require("util");
+const { promisify, inspect } = require("util");
 const readFile = promisify(fs.readFile);
 let presenter = require("../presenter.js");
 
@@ -56,8 +56,26 @@ describe("parseLogData", () => {
 
         it("returns nested arrays of objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
+            console.log(inspect(parsed, {depth: 10}));
             expect(parsed.length).toBe(2);
-            expect(parsed[0].sections.length).toBe(1);
+            expect(parsed[0].contents.length).toBe(2);
+            expect(parsed[0].contents[0].contents).toContain("UUDDLRLRBA");
+        });
+
+        it("returns twice nested arrays of objects", () => {
+            let parsed = presenter.parseLogData(rawLogData);
+            console.log(inspect(parsed, {depth: 10}));
+            expect(parsed.length).toBe(2);
+            expect(parsed[0].contents[1].contents.length).toBe(1);
+            expect(parsed[0].contents[1].contents[0].contents).toContain("UUDDLRLRBA");
+        });
+
+        it("returns strings between objects", () => {
+            let parsed = presenter.parseLogData(rawLogData);
+            // console.log(inspect(parsed, {depth: 10}));
+            expect(parsed.length).toBe(2);
+            expect(parsed[0].length).toBe(3);
+            expect(parsed[0].contents[1].contents).toContain("hello from the middle");
         });
     });
 });
