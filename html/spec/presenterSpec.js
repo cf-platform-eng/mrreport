@@ -45,6 +45,8 @@ describe("parseLogData", () => {
         it("returns the whole log", () => {
             let parsed = presenter.parseLogData(rawLogData);
             expect(parsed.length).toBe(1);
+            expect(parsed[0].contents).toContain("Pulling amidos/dcind@sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561...")
+            expect(parsed[0].contents).toContain("sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561: Pulling from amidos/dcind")
         })
     })
     describe("when there are sections", () => {
@@ -89,4 +91,16 @@ describe("parseLogData", () => {
             expect(parsed[1].contents[2].contents).toContain("hello from the middle");
         });
     });
+
+    describe("when last line has no newline", () => {
+        let rawLogData
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/no_final_newline.log')
+        })
+        it("returns last line when it doesn't finish with a newline", () => {
+            let parsed = presenter.parseLogData(rawLogData);
+            expect(parsed.length).toBe(1);
+            expect(parsed[0].contents).toContain("sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561: Pulling from amidos/dcind")
+        })
+    })
 });
