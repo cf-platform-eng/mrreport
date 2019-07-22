@@ -6,31 +6,38 @@ const presenter = {
     },
 
     parseLogData: (input) => {
-        let regex = /section-start: '(.+)' MRL:({.+})((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+})/gm;
+        let regex = /section-start: '(.+)' MRL:({.+})((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+}\n)|(.*\n)/gm;
+        //let regex = /section-start: '(.+)' MRL:({.+})((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+})/gm;
         let sections = [];
         let m;
 
+        let text = '';
         while ((m = regex.exec(input)) !== null) {
-            let regex2 = /section-start: '(.+)' MRL:({.+})((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+})/gm;
-            let m2;
-
             let contents = [];
-            while ((m2 = regex2.exec(m[3])) !== null) {
-                contents = presenter.parseLogData(m[3]);
+            let section;
+            if (m.length > 7 && m[8]) {
+                text += m[8];
+            } else {
+                if (text !== '') {
+                    sections.push({
+                        contents: text,
+                    })                    
+                    text = '';
+                }
+                sections.push({
+                    name: m[1],
+                    startMrl: m[2],
+                    contents: presenter.parseLogData(m[3]),
+                    statusCode: m[6],
+                    endMrl: m[7],
+                })
             }
-            if (contents.length == 0) {
-                contents = m[3];
-            }
+        }
 
-            let section = {
-                name: m[1],
-                startMrl: m[2],
-                contents,
-                statusCode: m[6],
-                endMrl: m[7],
-            };
-
-            sections.push(section);
+        if (text !== '') {
+            sections.push({
+                contents: text,
+            })                    
         }
 
         return sections;

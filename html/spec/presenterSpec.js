@@ -36,6 +36,17 @@ describe("injectElements", () => {
 });
 
 describe("parseLogData", () => {
+    describe("when there are no sections", () => {
+        let rawLogData;
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/no_markers.log');
+        });
+
+        it("returns the whole log", () => {
+            let parsed = presenter.parseLogData(rawLogData);
+            expect(parsed.length).toBe(1);
+        })
+    })
     describe("when there are sections", () => {
         let rawLogData;
         beforeEach(async () => {
@@ -44,7 +55,8 @@ describe("parseLogData", () => {
 
         it("splits based on tags into array of objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            expect(parsed.length).toBe(3);
+            //console.log(inspect(parsed, { depth: 10 }));
+            expect(parsed.length).toBe(6);
         });
     });
 
@@ -56,26 +68,25 @@ describe("parseLogData", () => {
 
         it("returns nested arrays of objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            console.log(inspect(parsed, {depth: 10}));
-            expect(parsed.length).toBe(2);
-            expect(parsed[0].contents.length).toBe(2);
-            expect(parsed[0].contents[0].contents).toContain("UUDDLRLRBA");
+            //console.log(inspect(parsed, {depth: 10}));
+            expect(parsed.length).toBe(4);
+            expect(parsed[0].contents).toContain("UUDDLRLRBA0");
         });
 
         it("returns twice nested arrays of objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            console.log(inspect(parsed, {depth: 10}));
-            expect(parsed.length).toBe(2);
-            expect(parsed[0].contents[1].contents.length).toBe(1);
-            expect(parsed[0].contents[1].contents[0].contents).toContain("UUDDLRLRBA");
+            //console.log(inspect(parsed, {depth: 10}));
+            expect(parsed.length).toBe(4);
+            expect(parsed[1].contents.length).toBe(5);
+            expect(parsed[1].contents[1].contents[0].contents).toContain("UUDDLRLRBA1");
         });
 
         it("returns strings between objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            // console.log(inspect(parsed, {depth: 10}));
-            expect(parsed.length).toBe(2);
-            expect(parsed[0].length).toBe(3);
-            expect(parsed[0].contents[1].contents).toContain("hello from the middle");
+            //console.log(inspect(parsed, {depth: 10}));
+            expect(parsed.length).toBe(4);
+            expect(parsed[1].contents.length).toBe(5);
+            expect(parsed[1].contents[2].contents).toContain("hello from the middle");
         });
     });
 });
