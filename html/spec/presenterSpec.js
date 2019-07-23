@@ -57,8 +57,16 @@ describe("parseLogData", () => {
 
         it("splits based on tags into array of objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            //console.log(inspect(parsed, { depth: 10 }));
             expect(parsed.length).toBe(6);
+            expect(parsed[0].contents).toBe("UUDDLRLRBA0\n\n")
+            expect(parsed[1].name).toBe("pull")
+            expect(parsed[2].name).toBe("pull2")
+            expect(parsed[2].contents.length).toBe(1)
+            expect(parsed[2].contents[0].contents).toBe("\nUUDDLRLRBA1\n")
+            expect(parsed[3].contents).toBe("\n")
+            expect(parsed[4].name).toBe("pull3")
+            expect(parsed[4].contents.length).toBe(1)
+            expect(parsed[4].contents[0].contents).toBe("\nUUDDLRLRBA2\n")
         });
     });
 
@@ -70,22 +78,33 @@ describe("parseLogData", () => {
 
         it("returns nested arrays of objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            //console.log(inspect(parsed, {depth: 10}));
             expect(parsed.length).toBe(4);
-            expect(parsed[0].contents).toContain("UUDDLRLRBA0");
+            expect(parsed[0].contents).toContain("UUDDLRLRBA0\n");
+            expect(parsed[1].contents.length).toBe(5)
+            expect(parsed[1].name).toBe("pull")
+            expect(parsed[1].statusCode).toBe("0")
+            expect(parsed[2].name).toBe("pull2")
+            expect(parsed[2].statusCode).toBe("2")
+            expect(parsed[3].contents).toContain("apk add jq")
+            expect(parsed[3].contents).toContain("fetch http://dl-cdn.alpinelinux.org/alpine/v3.10/main/x86_64/APKINDEX.tar.gz")
         });
 
         it("returns twice nested arrays of objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            //console.log(inspect(parsed, {depth: 10}));
             expect(parsed.length).toBe(4);
-            expect(parsed[1].contents.length).toBe(5);
-            expect(parsed[1].contents[1].contents[0].contents).toContain("UUDDLRLRBA1");
+            expect(parsed[1].name).toBe("pull")
+            const pull = parsed[1]
+            expect(pull.contents.length).toBe(5);
+            expect(pull.contents[1].name).toBe("nestedpull")
+            expect(pull.contents[1].contents[0].contents).toContain("UUDDLRLRBA1");
+            expect(pull.contents[3].name).toBe("nestedpull2")
+            nestedPull2 = pull.contents[3]
+            expect(nestedPull2.contents.length).toBe(2)
+            expect(nestedPull2.contents[1].name).toBe("twicenestedpull")
         });
 
         it("returns strings between objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            //console.log(inspect(parsed, {depth: 10}));
             expect(parsed.length).toBe(4);
             expect(parsed[1].contents.length).toBe(5);
             expect(parsed[1].contents[2].contents).toContain("hello from the middle");

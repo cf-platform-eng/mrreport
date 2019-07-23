@@ -1,4 +1,4 @@
-UUDDLRLRBA
+UUDDLRLRBA0
 
 section-start: 'pull' MRL:{"type":"section-start","name":"pull","time":"2019-07-18T10:21:12.130296141-04:00"}
 Pulling amidos/dcind@sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561...
@@ -25,11 +25,11 @@ Status: Downloaded newer image for amidos/dcind@sha256:fb793c416c7aebaf56dfb936d
 Successfully pulled amidos/dcind@sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561.
 section-end: 'pull' result: 0 MRL:{"type":"section-end","time":"2019-07-18T10:21:23.444186449-04:00"}
 section-start: 'pull2' MRL:{"type":"section-start","name":"pull2","time":"2019-07-18T10:21:12.130296141-04:00"}
-UUDDLRLRBA
+UUDDLRLRBA1
 section-end: 'pull2' result: 2 MRL:{"type":"section-end","name":"pull2","time":"2019-07-18T10:21:23.444186449-04:00"}
 
 section-start: 'pull3' MRL:{"type":"section-start","name":"pull3","time":"2019-07-18T10:21:32.130296141-04:00"}
-UUDDLRLRBA
+UUDDLRLRBA2
 section-end: 'pull3' result: 2 MRL:{"type":"section-end","name":"pull3","time":"2019-07-18T10:21:43.444186449-04:00"}
 
 

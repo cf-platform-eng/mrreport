@@ -6,16 +6,16 @@ const presenter = {
     },
 
     parseLogData: (input) => {
-        let regex = /section-start: '(.+)' MRL:({.+})((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+}\n)|(.*\n)/gm;
+        let regex = /section-start: '(.+)' MRL:({.+})((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+}\n)|(.*\n?)/gm;
         let sections = [];
         let m;
 
         let text = '';
-        while ((m = regex.exec(input)) !== null) {
+        while ((m = regex.exec(input)) !== null && m[0] !== '') {
             let contents = [];
             let section;
             if (m.length > 7 && m[8]) {
-                text += m[8];
+                text += m[8].trim() + '\n';   
             } else {
                 if (text !== '') {
                     sections.push({
