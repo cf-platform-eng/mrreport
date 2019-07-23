@@ -62,11 +62,11 @@ describe("parseLogData", () => {
             expect(parsed[1].name).toBe("pull")
             expect(parsed[2].name).toBe("pull2")
             expect(parsed[2].contents.length).toBe(1)
-            expect(parsed[2].contents[0].contents).toBe("\nUUDDLRLRBA1\n")
+            expect(parsed[2].contents[0].contents).toBe("UUDDLRLRBA1\n")
             expect(parsed[3].contents).toBe("\n")
             expect(parsed[4].name).toBe("pull3")
             expect(parsed[4].contents.length).toBe(1)
-            expect(parsed[4].contents[0].contents).toBe("\nUUDDLRLRBA2\n")
+            expect(parsed[4].contents[0].contents).toBe("UUDDLRLRBA2\n")
         });
     });
 
@@ -99,8 +99,8 @@ describe("parseLogData", () => {
             expect(pull.contents[1].contents[0].contents).toContain("UUDDLRLRBA1");
             expect(pull.contents[3].name).toBe("nestedpull2")
             nestedPull2 = pull.contents[3]
-            expect(nestedPull2.contents.length).toBe(2)
-            expect(nestedPull2.contents[1].name).toBe("twicenestedpull")
+            expect(nestedPull2.contents.length).toBe(1)
+            expect(nestedPull2.contents[0].name).toBe("twicenestedpull")
         });
 
         it("returns strings between objects", () => {
