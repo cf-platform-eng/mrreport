@@ -31,7 +31,7 @@ describe("injectElements", () => {
 
         expect(getElementById).toHaveBeenCalledWith("logData");
         expect(getElementById).toHaveBeenCalledWith("display");
-        expect(displayInnerHTML).toHaveBeenCalledWith("this is my log");
+        expect(displayInnerHTML).toHaveBeenCalledWith("this is my log\n");
     });
 });
 
@@ -123,3 +123,34 @@ describe("parseLogData", () => {
         })
     })
 });
+
+describe("renderLogData", () => {
+    describe("renders a single chunk of text", () => {
+        let sections = []
+        beforeEach(() => {
+            sections.push({
+                contents: "some log data"
+            })
+        })
+        it("returns just log text", () => {
+            let rendered = presenter.renderLogData(sections)
+            expect(rendered).toBe("some log data")
+        })
+    })
+    describe("renders a section", () => {
+        let sections = []
+        beforeEach(() => {
+            sections.push({
+                name: "section",
+                startMrl: '{"name":"section}',
+                contents: "some log data",
+                statusCode: "0",
+                endMrl: '{"name":"section"}'
+            })
+        })
+        it("returns a single details tag", () => {
+            let rendered = presenter.renderLogData(sections)
+            expect(rendered).toBe("<details><summary>section</summary>some log data</details>")
+        })
+    })
+})

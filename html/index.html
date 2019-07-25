@@ -19,7 +19,9 @@
     <pre id="display"></pre>
 </div>
 <script>
+    let module={}
     {{ .PresenterCode }}
+    presenter.injectElements()
 </script>
 </body>
 </html>

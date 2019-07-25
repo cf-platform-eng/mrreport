@@ -2,7 +2,13 @@ const presenter = {
     injectElements: () => {
         const logData = document.getElementById('logData').innerHTML
         const display = document.getElementById('display')
-        display.innerHTML = logData;
+        display.innerHTML = presenter.renderLogData(presenter.parseLogData(presenter.decode(logData)));
+    },
+
+    decode: function (str) {
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
+        });
     },
 
     parseLogData: (input) => {
@@ -40,6 +46,22 @@ const presenter = {
         }
 
         return sections;
+    },
+
+    renderLogData: (input) => {
+        let rendered = ''
+        if (Array.isArray(input)) {
+            input.forEach((section) => {
+                if (section.name && section.name !== '') {
+                    rendered += `<details><summary>${section.name}</summary>${presenter.renderLogData(section.contents)}</details>`
+                } else {
+                    rendered += section.contents
+                }
+            })
+        } else {
+            rendered += input
+        }
+        return rendered
     }
 };
 

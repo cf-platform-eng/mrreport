@@ -2,14 +2,15 @@ package dependencies
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"os"
 	"regexp"
+
+	"github.com/pkg/errors"
 )
 
-type DependenciesCommand struct {}
+type DependenciesCommand struct{}
 
 func (cmd *DependenciesCommand) Filter(in io.Reader, out io.WriteCloser) error {
 	logData, err := ioutil.ReadAll(in)
