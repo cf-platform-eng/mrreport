@@ -48,7 +48,7 @@ SRC = $(shell find . -name "*.go" | grep -v "_test\." )
 VERSION := $(or $(VERSION), "dev")
 LDFLAGS="-X github.com/cf-platform-eng/mrreport/version.Version=$(VERSION)"
 
-$(GENERATE_ARTIFACTS): html/index.html
+$(GENERATE_ARTIFACTS): html/index.html html/presenter.js
 	packr2 build
 
 build/mrreport: $(SRC) $(GENERATE_ARTIFACTS)

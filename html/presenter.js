@@ -48,18 +48,27 @@ const presenter = {
         return sections;
     },
 
+    renderSection: (section) => {
+        renderedSection = ''
+        if (section.name && section.name !== '') {
+            let resultString = (section.statusCode && section.statusCode !== '0') ? 'failed' : 'success'
+            renderedSection += `<details><summary>${section.name} [${resultString}]</summary><strong>Begin section ${section.name}</strong><br>${presenter.renderLogData(section.contents)}<strong>End section ${section.name}</strong><br></details>`
+        } else if (section.contents) {
+            renderedSection += presenter.renderLogData(section.contents)
+        } else if (section) {
+            renderedSection += section
+        }
+        return renderedSection
+    },
+
     renderLogData: (input) => {
         let rendered = ''
         if (Array.isArray(input)) {
             input.forEach((section) => {
-                if (section.name && section.name !== '') {
-                    rendered += `<details><summary>${section.name}</summary>${presenter.renderLogData(section.contents)}</details>`
-                } else {
-                    rendered += section.contents
-                }
+                rendered += presenter.renderSection(section)
             })
         } else {
-            rendered += input
+            rendered += presenter.renderSection(input)
         }
         return rendered
     }

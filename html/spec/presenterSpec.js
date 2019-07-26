@@ -33,6 +33,16 @@ describe("injectElements", () => {
         expect(getElementById).toHaveBeenCalledWith("display");
         expect(displayInnerHTML).toHaveBeenCalledWith("this is my log\n");
     });
+
+    it("populates the display with decoded log data", () => {
+        logDataElement.innerHTML = 'this &#34;is&#34; my log';
+        presenter.injectElements();
+
+        expect(getElementById).toHaveBeenCalledWith("logData");
+        expect(getElementById).toHaveBeenCalledWith("display");
+        expect(displayInnerHTML).toHaveBeenCalledWith('this "is" my log\n');
+
+    })
 });
 
 describe("parseLogData", () => {
@@ -150,7 +160,29 @@ describe("renderLogData", () => {
         })
         it("returns a single details tag", () => {
             let rendered = presenter.renderLogData(sections)
-            expect(rendered).toBe("<details><summary>section</summary>some log data</details>")
+            expect(rendered).toBe("<details><summary>section [success]</summary><strong>Begin section section</strong><br>some log data<strong>End section section</strong><br></details>")
+        })
+    })
+    describe("renders nested sections", () => {
+        let sections = []
+        beforeEach(() => {
+            sections.push({
+                name: "outer",
+                startMrl: '{"name":"outer}',
+                contents: {
+                    name: "inner",
+                    startMrl: '{"name":"inner"}',
+                    contents: "inner log data",
+                    statusCode: "1",
+                    endMrl: '{"name":"inner"}'
+                },
+                statusCode: "0",
+                endMrl: '{"name":"outer"}'
+            })
+        })
+        it("returns nested details tags", () => {
+            let rendered = presenter.renderLogData(sections)
+            expect(rendered).toBe("<details><summary>outer [success]</summary><strong>Begin section outer</strong><br><details><summary>inner [failed]</summary><strong>Begin section inner</strong><br>inner log data<strong>End section inner</strong><br></details><strong>End section outer</strong><br></details>")
         })
     })
 })
