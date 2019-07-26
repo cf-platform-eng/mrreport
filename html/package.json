@@ -1,0 +1,16 @@
+{
+  "name": "presenter",
+  "version": "0.0.1",
+  "description": "",
+  "main": "presenter.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-plugin-jasmine": "^2.10.1",
+    "jasmine": "^3.4.0"
+  }
+}

@@ -1,0 +1,51 @@
+UUDDLRLRBA0
+
+section-start: 'pull' MRL:{"type":"section-start","name":"pull","time":"2019-07-18T10:21:12.130296141-04:00"}
+Pulling amidos/dcind@sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561...
+sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561: Pulling from amidos/dcind
+921b31ab772b: Pulling fs layer
+d59b927f9354: Pulling fs layer
+311c1d3abc18: Pulling fs layer
+3c1fba299ec2: Pulling fs layer
+3c1fba299ec2: Waiting
+311c1d3abc18: Verifying Checksum
+311c1d3abc18: Download complete
+921b31ab772b: Verifying Checksum
+921b31ab772b: Download complete
+3c1fba299ec2: Verifying Checksum
+3c1fba299ec2: Download complete
+921b31ab772b: Pull complete
+d59b927f9354: Download complete
+d59b927f9354: Pull complete
+311c1d3abc18: Pull complete
+3c1fba299ec2: Pull complete
+Digest: sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561
+Status: Downloaded newer image for amidos/dcind@sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561
+
+section-start: 'nestedpull' MRL:{"type":"section-start","name":"nestedpull","time":"2019-07-18T10:21:12.130296141-04:00"}
+UUDDLRLRBA1
+section-end: 'nestedpull' result: 3 MRL:{"type":"section-end","name":"nestedpull","time":"2019-07-18T10:21:23.444186449-04:00"}
+
+hello from the middle of two nested objects
+
+section-start: 'nestedpull2' MRL:{"type":"section-start","name":"nestedpull","time":"2019-07-18T10:21:12.130296141-04:00"}
+section-start: 'twicenestedpull' MRL:{"type":"section-start","name":"twicenestedpull","time":"2019-07-18T10:21:12.130296141-04:00"}
+UUDDLRLRBA1
+section-end: 'twicenestedpull' result: 3 MRL:{"type":"section-end","name":"twicenestedpull","time":"2019-07-18T10:21:23.444186449-04:00"}
+section-end: 'nestedpull2' result: 3 MRL:{"type":"section-end","name":"nestedpull","time":"2019-07-18T10:21:23.444186449-04:00"}
+
+
+section-start: 'nestedpull3' MRL:{"type":"section-start","name":"nestedpull","time":"2019-07-18T10:21:12.130296141-04:00"}
+section-start: 'twicenestedpull' MRL:{"type":"section-start","name":"twicenestedpull","time":"2019-07-18T10:21:12.130296141-04:00"}
+UUDDLRLRBA1
+section-end: 'twicenestedpull' result: 3 MRL:{"type":"section-end","name":"twicenestedpull","time":"2019-07-18T10:21:23.444186449-04:00"}
+section-end: 'nestedpull3' result: 3 MRL:{"type":"section-end","name":"nestedpull","time":"2019-07-18T10:21:23.444186449-04:00"}
+
+Successfully pulled amidos/dcind@sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561.
+section-end: 'pull' result: 0 MRL:{"type":"section-end","time":"2019-07-18T10:21:23.444186449-04:00"}
+section-start: 'pull2' MRL:{"type":"section-start","name":"pull2","time":"2019-07-18T10:21:12.130296141-04:00"}
+UUDDLRLRBA2
+section-end: 'pull2' result: 2 MRL:{"type":"section-end","name":"pull2","time":"2019-07-18T10:21:23.444186449-04:00"}
+
+&#43; apk add jq
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.10/main/x86_64/APKINDEX.tar.gz

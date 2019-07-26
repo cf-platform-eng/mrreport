@@ -3,6 +3,7 @@ package dependencies_test
 import (
 	"bytes"
 	"errors"
+
 	. "github.com/MakeNowJust/heredoc/dot"
 	"github.com/cf-platform-eng/mrreport/dependencies"
 	"github.com/cf-platform-eng/mrreport/dependencies/dependenciesfakes"
