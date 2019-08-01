@@ -31,7 +31,7 @@ describe("injectElements", () => {
 
         expect(getElementById).toHaveBeenCalledWith("logData");
         expect(getElementById).toHaveBeenCalledWith("display");
-        expect(displayInnerHTML).toHaveBeenCalledWith("this is my log\n");
+        expect(displayInnerHTML).toHaveBeenCalledWith("this is my log");
     });
 
     it("populates the display with decoded log data", () => {
@@ -40,7 +40,7 @@ describe("injectElements", () => {
 
         expect(getElementById).toHaveBeenCalledWith("logData");
         expect(getElementById).toHaveBeenCalledWith("display");
-        expect(displayInnerHTML).toHaveBeenCalledWith('this "is" my log\n');
+        expect(displayInnerHTML).toHaveBeenCalledWith('this "is" my log');
 
     })
 });

@@ -21,7 +21,7 @@ const presenter = {
             let contents = [];
             let section;
             if (m.length > 7 && m[8]) {
-                text += m[8].trim() + '\n';   
+                text += m[8];   
             } else {
                 if (text !== '') {
                     sections.push({
