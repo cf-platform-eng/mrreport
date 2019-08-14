@@ -133,6 +133,19 @@ describe("parseLogData", () => {
         })
     })
 
+    describe("handles single opsman log section", () => {
+        let rawLogData
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/an_opsman_section.log')
+        })
+
+        it("returns a single opsman section", () => {
+            let parsed = presenter.parseLogData(rawLogData)
+            expect(parsed.length).toBe(1)
+            expect(parsed[0].name).toBe("Installing BOSH")
+        })
+    })
+
     describe("when there are opsmanager log sections", () => {
         let rawLogData
         beforeEach(async () => {

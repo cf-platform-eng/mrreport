@@ -11,7 +11,42 @@ const presenter = {
         });
     },
 
-    parseOpsManSection: (input) => input,
+    parseOpsManSection: (input) => {
+        let regex = /{"type":"(.+)","id":"(.+)","description":"(.+)"}\n===== (.+) UTC (.+) "(.+)"\n((.|\n)*)===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n{"type":"(.+)","id":"(.+)","description":"(.+)"}\n?|(.*\n?)/gm;
+        let sections = [];
+        let text = '';
+        let m;
+        while ((m = regex.exec(input)) !== null && m[0] !== '') {
+            // Build lines of text before a section
+            if (m.length > 15 && m[16]) {
+                text += m[16];
+                continue
+            }
+
+            // Add a section for text before making a new section
+            if (text !== '') {
+                sections.push({
+                    contents: text,
+                })
+                text = '';
+            }
+            // Add the matched section
+            sections.push({
+                name: m[3],
+                contents: m[7],
+                statusCode: m[12],
+            })
+        }
+
+        // Add a section for any trailing text
+        if (text !== '') {
+            sections.push({
+                contents: text,
+            })
+        }
+
+        return sections;
+    },
 
     parseLogData: (input) => {
         let regex = /section-start: '(.+)' MRL:({.+}\n)((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+}\n)|(.*\n?)/gm;
@@ -28,9 +63,7 @@ const presenter = {
 
             // Add a section for text before making a new section
             if (text !== '') {
-                sections.push({
-                    contents: presenter.parseOpsManSection(text),
-                })
+                sections = sections.concat(presenter.parseOpsManSection(text));
                 text = '';
             }
 
@@ -46,9 +79,7 @@ const presenter = {
 
         // Add a section for any trailing text
         if (text !== '') {
-            sections.push({
-                contents: presenter.parseOpsManSection(text),
-            })
+            sections = sections.concat(presenter.parseOpsManSection(text));
         }
 
         return sections;
