@@ -132,6 +132,28 @@ describe("parseLogData", () => {
             expect(parsed[0].contents).toContain("sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561: Pulling from amidos/dcind")
         })
     })
+
+    describe("when there are opsmanager log sections", () => {
+        let rawLogData
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/opsman_sections.log')
+        })
+
+        xit("returns sections for the ops manager logs", () => {
+            let parsed = presenter.parseLogData(rawLogData)
+            expect(parsed.length).toBe(4)
+            expect(parsed[0].contents).toBe("this comes before any sections\n\n")
+            expect(parsed[1].name).toBe("first section (no opsman)")
+            expect(parsed[2].name).toBe("second section (with opsman)")
+            expect(parsed[2].contents.length).toBe(4)
+            expect(parsed[2].contents[0].contents).toBe("log data before ops man call\n\n")
+            expect(parsed[2].contents[1].name).toBe("Installing BOSH")
+            expect(parsed[2].contents[1].contents).toContain("Deployment manifest: '/var/tempest/workspaces/default/deployments/bosh.yml'")
+            expect(parsed[2].contents[2].name).toBe("Uploading runtime config releases to the director")
+            expect(parsed[2].contents[2].contents).toContain("Extracting release: Extracting release")
+            expect(parsed[2].contents[3].contents).toBe("\nlog data after ops man call")
+        })
+    })
 });
 
 describe("renderLogData", () => {

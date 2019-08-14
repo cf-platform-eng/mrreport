@@ -11,6 +11,8 @@ const presenter = {
         });
     },
 
+    parseOpsManSection: (input) => input,
+
     parseLogData: (input) => {
         let regex = /section-start: '(.+)' MRL:({.+}\n)((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+}\n)|(.*\n?)/gm;
         let sections = [];
@@ -18,38 +20,42 @@ const presenter = {
 
         let text = '';
         while ((m = regex.exec(input)) !== null && m[0] !== '') {
-            let contents = [];
-            let section;
+            // Build lines of text before a section
             if (m.length > 7 && m[8]) {
-                text += m[8];   
-            } else {
-                if (text !== '') {
-                    sections.push({
-                        contents: text,
-                    })                    
-                    text = '';
-                }
-                sections.push({
-                    name: m[1],
-                    startMrl: m[2],
-                    contents: presenter.parseLogData(m[3]),
-                    statusCode: m[6],
-                    endMrl: m[7],
-                })
+                text += m[8];
+                continue
             }
+
+            // Add a section for text before making a new section
+            if (text !== '') {
+                sections.push({
+                    contents: presenter.parseOpsManSection(text),
+                })
+                text = '';
+            }
+
+            // Add the matched section
+            sections.push({
+                name: m[1],
+                startMrl: m[2],
+                contents: presenter.parseLogData(m[3]),
+                statusCode: m[6],
+                endMrl: m[7],
+            })
         }
 
+        // Add a section for any trailing text
         if (text !== '') {
             sections.push({
-                contents: text,
-            })                    
+                contents: presenter.parseOpsManSection(text),
+            })
         }
 
         return sections;
     },
 
     renderSection: (section) => {
-        renderedSection = ''
+        let renderedSection = ''
         if (section.name && section.name !== '') {
             let resultString = (section.statusCode && section.statusCode !== '0') ? 'failed' : 'success'
             renderedSection += `<details><summary>${section.name} [${resultString}]</summary><strong>Begin section ${section.name}</strong><br>${presenter.renderLogData(section.contents)}<strong>End section ${section.name}</strong><br></details>`
