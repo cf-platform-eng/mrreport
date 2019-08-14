@@ -12,14 +12,14 @@ const presenter = {
     },
 
     parseOpsManSection: (input) => {
-        let regex = /{"type":"(.+)","id":"(.+)","description":"(.+)"}\n===== (.+) UTC (.+) "(.+)"\n((.|\n)*)===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n{"type":"(.+)","id":"(\2)","description":"(.+)"}\n?|(.*\n?)/gm;
+        let regex = /({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)|(.*\n?)/gm;
         let sections = [];
         let text = '';
         let m;
         while ((m = regex.exec(input)) !== null && m[0] !== '') {
             // Build lines of text before a section
-            if (m.length > 15 && m[16]) {
-                text += m[16];
+            if (m.length > 19 && m[20]) {
+                text += m[20];
                 continue
             }
 
@@ -32,9 +32,9 @@ const presenter = {
             }
             // Add the matched section
             sections.push({
-                name: m[3],
-                contents: m[7],
-                statusCode: m[12],
+                name: m[4],
+                contents: m[1] + m[5] + m[9] + m[11] + m[16],
+                statusCode: m[15],
             })
         }
 

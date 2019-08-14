@@ -143,6 +143,11 @@ describe("parseLogData", () => {
             let parsed = presenter.parseLogData(rawLogData)
             expect(parsed.length).toBe(1)
             expect(parsed[0].name).toBe("Installing BOSH")
+            expect(parsed[0].contents).toContain('{"type":"step_started","id":"bosh_product.deploying","description":"Installing BOSH"}')
+            expect(parsed[0].contents).toContain('===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"')
+            expect(parsed[0].contents).toContain('Succeeded')
+            expect(parsed[0].contents).toContain('===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 0')
+            expect(parsed[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
         })
     })
 
