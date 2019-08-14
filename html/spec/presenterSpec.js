@@ -152,7 +152,7 @@ describe("parseLogData", () => {
             rawLogData = await readFile('./spec/support/fixtures/opsman_sections.log')
         })
 
-        xit("returns sections for the ops manager logs", () => {
+        it("returns sections for the ops manager logs", () => {
             let parsed = presenter.parseLogData(rawLogData)
             expect(parsed.length).toBe(4)
             expect(parsed[0].contents).toBe("this comes before any sections\n\n")
@@ -164,7 +164,7 @@ describe("parseLogData", () => {
             expect(parsed[2].contents[1].contents).toContain("Deployment manifest: '/var/tempest/workspaces/default/deployments/bosh.yml'")
             expect(parsed[2].contents[2].name).toBe("Uploading runtime config releases to the director")
             expect(parsed[2].contents[2].contents).toContain("Extracting release: Extracting release")
-            expect(parsed[2].contents[3].contents).toBe("\nlog data after ops man call")
+            expect(parsed[2].contents[3].contents).toBe("\nlog data after ops man call\n")
         })
     })
 });

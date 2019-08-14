@@ -12,7 +12,7 @@ const presenter = {
     },
 
     parseOpsManSection: (input) => {
-        let regex = /{"type":"(.+)","id":"(.+)","description":"(.+)"}\n===== (.+) UTC (.+) "(.+)"\n((.|\n)*)===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n{"type":"(.+)","id":"(.+)","description":"(.+)"}\n?|(.*\n?)/gm;
+        let regex = /{"type":"(.+)","id":"(.+)","description":"(.+)"}\n===== (.+) UTC (.+) "(.+)"\n((.|\n)*)===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n{"type":"(.+)","id":"(\2)","description":"(.+)"}\n?|(.*\n?)/gm;
         let sections = [];
         let text = '';
         let m;
