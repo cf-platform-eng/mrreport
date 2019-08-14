@@ -132,6 +132,46 @@ describe("parseLogData", () => {
             expect(parsed[0].contents).toContain("sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561: Pulling from amidos/dcind")
         })
     })
+
+    describe("handles single opsman log section", () => {
+        let rawLogData
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/an_opsman_section.log')
+        })
+
+        it("returns a single opsman section", () => {
+            let parsed = presenter.parseLogData(rawLogData)
+            expect(parsed.length).toBe(1)
+            expect(parsed[0].name).toBe("Installing BOSH")
+            expect(parsed[0].contents).toContain('{"type":"step_started","id":"bosh_product.deploying","description":"Installing BOSH"}')
+            expect(parsed[0].contents).toContain('===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"')
+            expect(parsed[0].contents).toContain('Succeeded')
+            expect(parsed[0].contents).toContain('===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 0')
+            expect(parsed[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
+        })
+    })
+
+    describe("when there are opsmanager log sections", () => {
+        let rawLogData
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/opsman_sections.log')
+        })
+
+        it("returns sections for the ops manager logs", () => {
+            let parsed = presenter.parseLogData(rawLogData)
+            expect(parsed.length).toBe(4)
+            expect(parsed[0].contents).toBe("this comes before any sections\n\n")
+            expect(parsed[1].name).toBe("first section (no opsman)")
+            expect(parsed[2].name).toBe("second section (with opsman)")
+            expect(parsed[2].contents.length).toBe(4)
+            expect(parsed[2].contents[0].contents).toBe("log data before ops man call\n\n")
+            expect(parsed[2].contents[1].name).toBe("Installing BOSH")
+            expect(parsed[2].contents[1].contents).toContain("Deployment manifest: '/var/tempest/workspaces/default/deployments/bosh.yml'")
+            expect(parsed[2].contents[2].name).toBe("Uploading runtime config releases to the director")
+            expect(parsed[2].contents[2].contents).toContain("Extracting release: Extracting release")
+            expect(parsed[2].contents[3].contents).toBe("\nlog data after ops man call\n")
+        })
+    })
 });
 
 describe("renderLogData", () => {

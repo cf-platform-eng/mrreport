@@ -1,0 +1,57 @@
+this comes before any sections
+
+section-start: 'first section (no opsman)' MRL:{"type":"section-start","name":"first section (no opsman)","time":"2019-07-18T10:21:12.130296141-04:00"}
+section-end: 'first section (no opsman)' result: 3 MRL:{"type":"section-end","name":"first section (no opsman)","time":"2019-07-18T10:21:12.130296141-04:00"}
+section-start: 'second section (with opsman)' MRL:{"type":"section-start","name":"second section (with opsman)","time":"2019-07-18T10:21:12.130296141-04:00"}
+log data before ops man call
+
+{"type":"step_started","id":"bosh_product.deploying","description":"Installing BOSH"}
+===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"
+Deployment manifest: '/var/tempest/workspaces/default/deployments/bosh.yml'
+Deployment state: '/var/tempest/workspaces/default/deployments/bosh-state.json'
+
+Started validating
+  Validating release 'bosh'... Finished (00:00:04)
+  Validating release 'bosh-google-cpi'... Finished (00:00:08)
+  Validating release 'uaa'... Finished (00:00:11)
+  Validating release 'credhub'... Finished (00:00:03)
+  Validating release 'bosh-system-metrics-server'... Finished (00:00:05)
+  Validating release 'os-conf'... Finished (00:00:00)
+  Validating release 'backup-and-restore-sdk'... Finished (00:00:12)
+  Validating release 'bpm'... Finished (00:00:04)
+  Validating cpi release... Finished (00:00:00)
+  Validating deployment manifest... Finished (00:00:00)
+  Validating stemcell... Finished (00:00:00)
+Finished validating (00:00:51)
+No deployment, stemcell or release changes. Skipping deploy.
+
+Succeeded
+===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 0
+{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}
+{"type":"step_started","id":"bosh.uploading_runtime_config_releases","description":"Uploading runtime config releases to the director"}
+===== 2019-08-14 15:32:22 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty --environment=10.0.0.5 upload-release /var/tempest/internal_releases/dns"
+Using environment '10.0.0.5' as client 'ops_manager'
+
+   0.00% 100.00% 2.39 MiB/s 0s
+Task 58
+
+Task 58 | 15:32:31 | Extracting release: Extracting release (00:00:00)
+Task 58 | 15:32:31 | Verifying manifest: Verifying manifest (00:00:00)
+Task 58 | 15:32:31 | Resolving package dependencies: Resolving package dependencies (00:00:00)
+Task 58 | 15:32:31 | Processing 6 existing packages: Processing 6 existing packages (00:00:01)
+Task 58 | 15:32:32 | Processing 4 existing jobs: Processing 4 existing jobs (00:00:00)
+Task 58 | 15:32:32 | Release has been created: bosh-dns/1.11.0 (00:00:00)
+
+Task 58 Started  Wed Aug 14 15:32:31 UTC 2019
+Task 58 Finished Wed Aug 14 15:32:32 UTC 2019
+Task 58 Duration 00:00:01
+Task 58 done
+
+Succeeded
+===== 2019-08-14 15:32:32 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty --environment=10.0.0.5 upload-release /var/tempest/internal_releases/dns"; Duration: 10s; Exit Status: 0
+{"type":"step_finished","id":"bosh.uploading_runtime_config_releases","description":"Uploading runtime config releases to the director"}
+
+log data after ops man call
+section-end: 'second section (with opsman)' result: 3 MRL:{"type":"section-end","name":"second section (with opsman)","time":"2019-07-18T10:21:23.444186449-04:00"}
+
+This comes after the sections
