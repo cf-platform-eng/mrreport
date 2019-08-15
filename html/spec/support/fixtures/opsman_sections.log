@@ -26,7 +26,7 @@ Finished validating (00:00:51)
 No deployment, stemcell or release changes. Skipping deploy.
 
 Succeeded
-===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 0
+===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 1
 {"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}
 {"type":"step_started","id":"bosh.uploading_runtime_config_releases","description":"Uploading runtime config releases to the director"}
 ===== 2019-08-14 15:32:22 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty --environment=10.0.0.5 upload-release /var/tempest/internal_releases/dns"
