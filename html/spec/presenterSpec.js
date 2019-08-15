@@ -167,6 +167,22 @@ describe("parseLogData", () => {
         })
     })
 
+    describe("handles equals only marker opsman log section", () => {
+        let rawLogData
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/opsman_equals_only_markers.log')
+        })
+
+        it("returns a single opsman section", () => {
+            let parsed = presenter.parseLogData(rawLogData)
+            expect(parsed.length).toBe(1)
+            expect(parsed[0].name).toBe("/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml")
+            expect(parsed[0].contents).toContain('===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"')
+            expect(parsed[0].contents).toContain('Succeeded')
+            expect(parsed[0].contents).toContain('===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 0')
+        })
+    })
+
     describe("when there are opsmanager log sections", () => {
         let rawLogData
         beforeEach(async () => {

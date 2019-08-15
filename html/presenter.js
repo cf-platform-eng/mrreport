@@ -12,14 +12,21 @@ const presenter = {
     },
 
     parseOpsManSection: (input) => {
-        let regex = /({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)|({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)((.|\n)*)({"type":"(.+)","id":"(\22)","description":"(.+)"}\n)|(.*\n?)/gm;
+        // TODO: find way to compose these to make the regex easier to grok
+        //let twoLineSection = '({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)'
+        //let jsonSection = '({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)((.|\n)*)({"type":"(.+)","id":"(\22)","description":"(.+)"}\n)'
+        //let equalsSection = '(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) "(\33)"; Duration: (.+); Exit Status: (.+)\n*)'
+        //let textLine = '(.*\n?)'
+        //let regex = new RegExp('/' + twoLineSection + '|' + jsonSection + '|' + textLine + '/', "gm")
+        
+        let regex = /({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)|({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)((.|\n)*)({"type":"(.+)","id":"(\22)","description":"(.+)"}\n)|(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) "(\33)"; Duration: (.+); Exit Status: (.+)\n*)|(.*\n?)/gm;
         let sections = [];
         let text = '';
         let m;
         while ((m = regex.exec(input)) !== null && m[0] !== '') {
             // Build lines of text before a section (the final regex group)
-            if (m.length > 29 && m[30]) {
-                text += m[30];
+            if (m.length > 41 && m[42]) {
+                text += m[42];
                 continue
             }
 
@@ -38,6 +45,16 @@ const presenter = {
                     contents: m[20] + m[24] + m[26],
                     statusCode: "0",
                 })                
+                continue;
+            }
+            
+            // handle equals delimited section (the third regex group)
+            if (m.length > 29 && m[30]) {
+                sections.push({
+                    name: m[33],
+                    contents: m[30] + m[34] + m[36],
+                    statusCode: m[40],
+                })
                 continue;
             }
             // handle full two line section marker (the first regex group)
