@@ -12,14 +12,14 @@ const presenter = {
     },
 
     parseOpsManSection: (input) => {
-        let regex = /({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)|(.*\n?)/gm;
+        let regex = /({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)|({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)((.|\n)*)({"type":"(.+)","id":"(\22)","description":"(.+)"}\n)|(.*\n?)/gm;
         let sections = [];
         let text = '';
         let m;
         while ((m = regex.exec(input)) !== null && m[0] !== '') {
-            // Build lines of text before a section
-            if (m.length > 19 && m[20]) {
-                text += m[20];
+            // Build lines of text before a section (the final regex group)
+            if (m.length > 29 && m[30]) {
+                text += m[30];
                 continue
             }
 
@@ -30,7 +30,17 @@ const presenter = {
                 })
                 text = '';
             }
-            // Add the matched section
+
+            // handle json only (the second regex group)
+            if (m.length > 19 && m[20]) {
+                sections.push({
+                    name: m[23],
+                    contents: m[20] + m[24] + m[26],
+                    statusCode: "0",
+                })                
+                continue;
+            }
+            // handle full two line section marker (the first regex group)
             sections.push({
                 name: m[4],
                 contents: m[1] + m[5] + m[9] + m[11] + m[16],

@@ -133,7 +133,7 @@ describe("parseLogData", () => {
         })
     })
 
-    describe("handles single opsman log section", () => {
+    describe("handles double marker opsman log section", () => {
         let rawLogData
         beforeEach(async () => {
             rawLogData = await readFile('./spec/support/fixtures/an_opsman_section.log')
@@ -147,6 +147,22 @@ describe("parseLogData", () => {
             expect(parsed[0].contents).toContain('===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"')
             expect(parsed[0].contents).toContain('Succeeded')
             expect(parsed[0].contents).toContain('===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 0')
+            expect(parsed[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
+        })
+    })
+
+    describe("handles json only marker opsman log section", () => {
+        let rawLogData
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/opsman_json_only_markers.log')
+        })
+
+        it("returns a single opsman section", () => {
+            let parsed = presenter.parseLogData(rawLogData)
+            expect(parsed.length).toBe(1)
+            expect(parsed[0].name).toBe("Installing BOSH")
+            expect(parsed[0].contents).toContain('{"type":"step_started","id":"bosh_product.deploying","description":"Installing BOSH"}')
+            expect(parsed[0].contents).toContain('Succeeded')
             expect(parsed[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
         })
     })
