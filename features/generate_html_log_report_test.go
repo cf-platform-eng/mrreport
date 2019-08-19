@@ -38,6 +38,16 @@ var _ = Describe("Generate HTML log", func() {
 		steps.And("the result is a html page displaying the end-script tag and the rest of the log")
 	})
 
+	Scenario("Log contains errors", func() {
+		steps.Given("the mrreport command is built")
+		steps.And("a log with an error in it, as a stream")
+		steps.When("I pipe the log output into the generate command")
+
+		steps.Then("the command exits without error")
+		steps.And("the result including the failure section is on stdout")
+		steps.And("the result is a html page displaying the failure section and the rest of the log")
+	})
+
 	steps.Define(func(define Definitions) {
 		var (
 			logStream      *bytes.Buffer
@@ -65,6 +75,14 @@ var _ = Describe("Generate HTML log", func() {
 				D(`</script>This log tells you about some <pre id="not_in_doc">html you need</pre>`))
 		})
 
+		define.Given(`^a log with an error in it, as a stream$`, func() {
+			logStream = bytes.NewBufferString(D(`
+				===== 2019-08-14 15:31:29 UTC Running "an operation"
+				Operation failed
+				===== 2019-08-14 15:32:21 UTC Finished "an operation"; Duration: 52s; Exit Status: 1
+			`))
+		})
+
 		define.When(`^I pipe the log output into the generate command$`, func() {
 			generateCommand := exec.Command(pathToMRReport, "generate")
 			generateCommand.Stdin = logStream
@@ -87,6 +105,15 @@ var _ = Describe("Generate HTML log", func() {
 				"&lt;/script&gt;This log tells you about some &lt;pre id=&#34;not_in_doc&#34;&gt;html you need&lt;/pre&gt;"))
 		})
 
+		define.Then(`^the result including the failure section is on stdout$`, func() {
+			Eventually(commandSession.Out).Should(Say(
+				"===== 2019-08-14 15:31:29 UTC Running &#34;an operation&#34;"))
+			Eventually(commandSession.Out).Should(Say(
+				"Operation failed"))
+			Eventually(commandSession.Out).Should(Say(
+				"===== 2019-08-14 15:32:21 UTC Finished &#34;an operation&#34;; Duration: 52s; Exit Status: 1"))
+		})
+
 		define.Then(`^the result is a html page displaying the simple log$`, func() {
 			html := string(commandSession.Out.Contents())
 
@@ -94,7 +121,7 @@ var _ = Describe("Generate HTML log", func() {
 			defer server.Close()
 
 			Expect(page.Navigate(server.URL)).To(Succeed())
-			Expect(page.Find("#display")).To(matchers.HaveText("this is the log\nit has multiple lines"))
+			Expect(page.Find("#display")).To(matchers.HaveText("Log\nthis is the log\nit has multiple lines"))
 		})
 
 		define.Then(`^the result is a html page displaying the end-script tag and the rest of the log$`, func() {
@@ -105,7 +132,18 @@ var _ = Describe("Generate HTML log", func() {
 
 			Expect(page.Navigate(server.URL)).To(Succeed())
 			Expect(page.Find("#display")).To(
-				matchers.HaveText("</script>This log tells you about some <pre id=\"not_in_doc\">html you need</pre>"))
+				matchers.HaveText("Log\n</script>This log tells you about some <pre id=\"not_in_doc\">html you need</pre>"))
+		})
+
+		define.Then(`^the result is a html page displaying the failure section and the rest of the log$`, func() {
+			html := string(commandSession.Out.Contents())
+
+			server := serveDocument(html)
+			defer server.Close()
+
+			Expect(page.Navigate(server.URL)).To(Succeed())
+			Expect(page.Find("#display")).To(
+				matchers.HaveText("Failures\nan operation\nLog\nan operation [failed]\nBegin section an operation\n===== 2019-08-14 15:31:29 UTC Running \"an operation\"\nOperation failed\n===== 2019-08-14 15:32:21 UTC Finished \"an operation\"; Duration: 52s; Exit Status: 1\nEnd section an operation"))
 		})
 	})
 })

@@ -31,7 +31,7 @@ describe("injectElements", () => {
 
         expect(getElementById).toHaveBeenCalledWith("logData");
         expect(getElementById).toHaveBeenCalledWith("display");
-        expect(displayInnerHTML).toHaveBeenCalledWith("this is my log");
+        expect(displayInnerHTML).toHaveBeenCalledWith("<div><h1>Log</h1>this is my log</div>");
     });
 
     it("populates the display with decoded log data", () => {
@@ -40,7 +40,7 @@ describe("injectElements", () => {
 
         expect(getElementById).toHaveBeenCalledWith("logData");
         expect(getElementById).toHaveBeenCalledWith("display");
-        expect(displayInnerHTML).toHaveBeenCalledWith('this "is" my log');
+        expect(displayInnerHTML).toHaveBeenCalledWith('<div><h1>Log</h1>this "is" my log</div>');
 
     })
 });
@@ -220,7 +220,7 @@ describe("renderLogData", () => {
         })
         it("returns just log text", () => {
             let rendered = presenter.renderLogData(sections)
-            expect(rendered).toBe("some log data")
+            expect(rendered.log).toBe("some log data")
         })
     })
     describe("renders a section", () => {
@@ -236,7 +236,7 @@ describe("renderLogData", () => {
         })
         it("returns a single details tag", () => {
             let rendered = presenter.renderLogData(sections)
-            expect(rendered).toBe("<details><summary>section [success]</summary><strong>Begin section section</strong><br>some log data<strong>End section section</strong><br></details>")
+            expect(rendered.log).toBe("<details><summary>section [success]</summary><strong>Begin section section</strong><br>some log data<strong>End section section</strong><br></details>")
         })
     })
     describe("renders nested sections", () => {
@@ -258,7 +258,44 @@ describe("renderLogData", () => {
         })
         it("returns nested details tags", () => {
             let rendered = presenter.renderLogData(sections)
-            expect(rendered).toBe("<details><summary>outer [success]</summary><strong>Begin section outer</strong><br><details><summary>inner [failed]</summary><strong>Begin section inner</strong><br>inner log data<strong>End section inner</strong><br></details><strong>End section outer</strong><br></details>")
+            expect(rendered.log).toBe('<details><summary>outer [success]</summary><strong>Begin section outer</strong><br><details id="inner"><summary>inner [failed]</summary><strong>Begin section inner</strong><br>inner log data<strong>End section inner</strong><br></details><strong>End section outer</strong><br></details>')
+            expect(rendered.errors.length).not.toBe(0)
+        })
+    })
+    describe("renders errors", () => {
+        let sections = []
+        beforeEach(() => {
+            sections.push({
+                name: "errors",
+                startMrl: '{"name":"errors"}',
+                contents: "an error",
+                statusCode: "1",
+                endMrl:'{"name":"errors"}'
+            })
+        })
+        it("returns error header and contents", () => {
+            let rendered = presenter.renderLogData(sections)
+            expect(rendered.log).toBe('<details id="errors"><summary>errors [failed]</summary><strong>Begin section errors</strong><br>an error<strong>End section errors</strong><br></details>')
+            expect(rendered.errors).toBe('<a href="#errors">errors</a><br>')
+        })
+    })
+
+    describe("renders errors", () => {
+        let sections = []
+        beforeEach(() => {
+            sections.push({
+                name: "some errors",
+                startMrl: '{"name":"some errors"}',
+                contents: "an error",
+                statusCode: "1",
+                endMrl: '{"name":"some errors"}'
+            })
+        })
+        it("handles names with spaces (properly generates anchor names)", () => {
+            sections[0].name = "some errors"
+            let rendered = presenter.renderLogData(sections)
+            expect(rendered.log).toBe('<details id="some_errors"><summary>some errors [failed]</summary><strong>Begin section some errors</strong><br>an error<strong>End section some errors</strong><br></details>')
+            expect(rendered.errors).toBe('<a href="#some_errors">some errors</a><br>')
         })
     })
 })

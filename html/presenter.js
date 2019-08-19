@@ -2,13 +2,24 @@ const presenter = {
     injectElements: () => {
         const logData = document.getElementById('logData').innerHTML
         const display = document.getElementById('display')
-        display.innerHTML = presenter.renderLogData(presenter.parseLogData(presenter.decode(logData)));
+        const logContents = presenter.renderLogData(presenter.parseLogData(presenter.decode(logData)));
+
+        if (logContents.errors.length > 0) {
+            display.innerHTML = `<div><h1>Failures</h1>${logContents.errors}</div><div><h1>Log</h1>${logContents.log}</div>`
+        } else {
+            display.innerHTML = `<div><h1>Log</h1>${logContents.log}</div>`
+        }
+        
     },
 
     decode: function (str) {
         return str.replace(/&#(\d+);/g, function (match, dec) {
             return String.fromCharCode(dec);
         });
+    },
+
+    replaceSpacesWithUnderscores: function (str) {
+        return str.replace(' ', '_')
     },
 
     parseOpsManSection: (input) => {
@@ -113,28 +124,38 @@ const presenter = {
     },
 
     renderSection: (section) => {
-        let renderedSection = ''
+        let rendered = { log: '', errors: '' }
         if (section.name && section.name !== '') {
-            let resultString = (section.statusCode && section.statusCode !== '0') ? 'failed' : 'success'
-            renderedSection += `<details><summary>${section.name} [${resultString}]</summary><strong>Begin section ${section.name}</strong><br>${presenter.renderLogData(section.contents)}<strong>End section ${section.name}</strong><br></details>`
+            const childRender = presenter.renderLogData(section.contents)
+            if (section.statusCode && section.statusCode !== '0') {
+                const anchorName = presenter.replaceSpacesWithUnderscores(section.name)
+                rendered.log = `<details id="${anchorName}"><summary>${section.name} [failed]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong>End section ${section.name}</strong><br></details>`;
+                rendered.errors = childRender.errors + `<a href="#${anchorName}">${section.name}</a><br>`;
+            } else {
+                rendered.log = `<details><summary>${section.name} [success]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong>End section ${section.name}</strong><br></details>`;
+                rendered.errors = childRender.errors;
+            }
+            
         } else if (section.contents) {
-            renderedSection += presenter.renderLogData(section.contents)
+            rendered = presenter.renderLogData(section.contents);
         } else if (section) {
-            renderedSection += section
+            rendered.log = section;
         }
-        return renderedSection
+        return rendered
     },
 
     renderLogData: (input) => {
-        let rendered = ''
+        let rendered = {log:'', errors:''}
         if (Array.isArray(input)) {
             input.forEach((section) => {
-                rendered += presenter.renderSection(section)
+                newSection = presenter.renderSection(section);
+                rendered.log += newSection.log;
+                rendered.errors += newSection.errors
             })
         } else {
-            rendered += presenter.renderSection(input)
+            rendered = presenter.renderSection(input);
         }
-        return rendered
+        return rendered;
     }
 };
 
