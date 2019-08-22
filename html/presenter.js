@@ -130,7 +130,7 @@ const presenter = {
             if (section.statusCode && section.statusCode !== '0') {
                 const anchorName = presenter.replaceSpacesWithUnderscores(section.name)
                 rendered.log = `<details id="${anchorName}"><summary>${section.name} [failed]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong>End section ${section.name}</strong><br></details>`;
-                rendered.errors = childRender.errors + `<a href="#${anchorName}">${section.name}</a><br>`;
+                rendered.errors = childRender.errors + `<a href="#${anchorName}" onclick='presenter.openError("${anchorName}"); return false;'>${section.name}</a><br>`;
             } else {
                 rendered.log = `<details><summary>${section.name} [success]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong>End section ${section.name}</strong><br></details>`;
                 rendered.errors = childRender.errors;
@@ -156,6 +156,10 @@ const presenter = {
             rendered = presenter.renderSection(input);
         }
         return rendered;
+    },
+
+    openError: (id) => {
+        document.getElementById(id).open = true;
     }
 };
 

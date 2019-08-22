@@ -276,7 +276,7 @@ describe("renderLogData", () => {
         it("returns error header and contents", () => {
             let rendered = presenter.renderLogData(sections)
             expect(rendered.log).toBe('<details id="errors"><summary>errors [failed]</summary><strong>Begin section errors</strong><br>an error<strong>End section errors</strong><br></details>')
-            expect(rendered.errors).toBe('<a href="#errors">errors</a><br>')
+            expect(rendered.errors).toBe('<a href="#errors" onclick=\'presenter.openError("errors"); return false;\'>errors</a><br>')
         })
     })
 
@@ -295,7 +295,7 @@ describe("renderLogData", () => {
             sections[0].name = "some errors"
             let rendered = presenter.renderLogData(sections)
             expect(rendered.log).toBe('<details id="some_errors"><summary>some errors [failed]</summary><strong>Begin section some errors</strong><br>an error<strong>End section some errors</strong><br></details>')
-            expect(rendered.errors).toBe('<a href="#some_errors">some errors</a><br>')
+            expect(rendered.errors).toBe('<a href="#some_errors" onclick=\'presenter.openError("some_errors"); return false;\'>some errors</a><br>')
         })
     })
 })

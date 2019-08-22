@@ -48,6 +48,16 @@ var _ = Describe("Generate HTML log", func() {
 		steps.And("the result is a html page displaying the failure section and the rest of the log")
 	})
 
+	Scenario("Click on error expands section", func() {
+		steps.Given("the mrreport command is built")
+		steps.And("a log with an error in it, as a stream")
+		steps.When("I pipe the log output into the generate command")
+
+		steps.Then("the command exits without error")
+		steps.And("the result is a html page displaying the failure links and the folded logs")
+		steps.And("when the failure link is clicked, the failure section is expanded")
+	})
+
 	steps.Define(func(define Definitions) {
 		var (
 			logStream      *bytes.Buffer
@@ -144,6 +154,28 @@ var _ = Describe("Generate HTML log", func() {
 			Expect(page.Navigate(server.URL)).To(Succeed())
 			Expect(page.Find("#display")).To(
 				matchers.HaveText("Failures\nan operation\nLog\nan operation [failed]\nBegin section an operation\n===== 2019-08-14 15:31:29 UTC Running \"an operation\"\nOperation failed\n===== 2019-08-14 15:32:21 UTC Finished \"an operation\"; Duration: 52s; Exit Status: 1\nEnd section an operation"))
+		})
+
+		define.Then(`^the result is a html page displaying the failure links and the folded logs$`, func() {
+			html := string(commandSession.Out.Contents())
+
+			server := serveDocument(html)
+			defer server.Close()
+
+			Expect(page.Navigate(server.URL)).To(Succeed())
+			Expect(page.Find("#an_operation").Count()).To(Equal(1))
+			Expect(page.FindByXPath("//*[@id='an_operation'][@open]")).NotTo(matchers.BeFound())
+		})
+
+		define.Then(`^when the failure link is clicked, the failure section is expanded$`, func() {
+			html := string(commandSession.Out.Contents())
+
+			server := serveDocument(html)
+			defer server.Close()
+
+			Expect(page.Navigate(server.URL)).To(Succeed())
+			Expect(page.Find("a").Click()).To(Succeed())
+			Expect(page.FindByXPath("//*[@id='an_operation'][@open]")).To(matchers.BeFound())
 		})
 	})
 })
