@@ -258,7 +258,7 @@ describe("renderLogData", () => {
         })
         it("returns nested details tags", () => {
             let rendered = presenter.renderLogData(sections)
-            expect(rendered.log).toBe('<details><summary>outer [success]</summary><strong>Begin section outer</strong><br><details id="inner"><summary>inner [failed]</summary><strong>Begin section inner</strong><br>inner log data<strong>End section inner</strong><br></details><strong>End section outer</strong><br></details>')
+            expect(rendered.log).toBe('<details><summary>outer [success]</summary><strong>Begin section outer</strong><br><details id="inner"><summary>inner [failed]</summary><strong>Begin section inner</strong><br>inner log data<strong id="inner_end">End section inner</strong><br></details><strong>End section outer</strong><br></details>')
             expect(rendered.errors.length).not.toBe(0)
         })
     })
@@ -275,8 +275,8 @@ describe("renderLogData", () => {
         })
         it("returns error header and contents", () => {
             let rendered = presenter.renderLogData(sections)
-            expect(rendered.log).toBe('<details id="errors"><summary>errors [failed]</summary><strong>Begin section errors</strong><br>an error<strong>End section errors</strong><br></details>')
-            expect(rendered.errors).toBe('<a href="#errors" onclick=\'presenter.openError("errors"); return false;\'>errors</a><br>')
+            expect(rendered.log).toBe('<details id="errors"><summary>errors [failed]</summary><strong>Begin section errors</strong><br>an error<strong id="errors_end">End section errors</strong><br></details>')
+            expect(rendered.errors).toBe('<a href="#errors_end" onclick=\'presenter.openError("errors");\'>errors</a><br>')
         })
     })
 
@@ -294,8 +294,8 @@ describe("renderLogData", () => {
         it("handles names with spaces (properly generates anchor names)", () => {
             sections[0].name = "some errors"
             let rendered = presenter.renderLogData(sections)
-            expect(rendered.log).toBe('<details id="some_errors"><summary>some errors [failed]</summary><strong>Begin section some errors</strong><br>an error<strong>End section some errors</strong><br></details>')
-            expect(rendered.errors).toBe('<a href="#some_errors" onclick=\'presenter.openError("some_errors"); return false;\'>some errors</a><br>')
+            expect(rendered.log).toBe('<details id="some_errors"><summary>some errors [failed]</summary><strong>Begin section some errors</strong><br>an error<strong id="some_errors_end">End section some errors</strong><br></details>')
+            expect(rendered.errors).toBe('<a href="#some_errors_end" onclick=\'presenter.openError("some_errors");\'>some errors</a><br>')
         })
     })
 })
