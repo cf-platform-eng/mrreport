@@ -2,7 +2,14 @@ const presenter = {
     injectElements: () => {
         const logData = document.getElementById('logData').innerHTML
         const display = document.getElementById('display')
-        display.innerHTML = presenter.renderLogData(presenter.parseLogData(presenter.decode(logData)));
+        const logContents = presenter.renderLogData(presenter.parseLogData(presenter.decode(logData)));
+
+        if (logContents.errors.length > 0) {
+            display.innerHTML = `<div><h1>Failures</h1>${logContents.errors}</div><div><h1>Log</h1>${logContents.log}</div>`
+        } else {
+            display.innerHTML = `<div><h1>Log</h1>${logContents.log}</div>`
+        }
+        
     },
 
     decode: function (str) {
@@ -11,15 +18,26 @@ const presenter = {
         });
     },
 
+    replaceSpacesWithUnderscores: function (str) {
+        return str.replace(' ', '_')
+    },
+
     parseOpsManSection: (input) => {
-        let regex = /({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)|(.*\n?)/gm;
+        // TODO: find way to compose these to make the regex easier to grok
+        //let twoLineSection = '({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)'
+        //let jsonSection = '({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)((.|\n)*)({"type":"(.+)","id":"(\22)","description":"(.+)"}\n)'
+        //let equalsSection = '(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) "(\33)"; Duration: (.+); Exit Status: (.+)\n*)'
+        //let textLine = '(.*\n?)'
+        //let regex = new RegExp('/' + twoLineSection + '|' + jsonSection + '|' + textLine + '/', "gm")
+        
+        let regex = /({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)|({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)((.|\n)*)({"type":"(.+)","id":"(\22)","description":"(.+)"}\n)|(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) "(\33)"; Duration: (.+); Exit Status: (.+)\n*)|(.*\n?)/gm;
         let sections = [];
         let text = '';
         let m;
         while ((m = regex.exec(input)) !== null && m[0] !== '') {
-            // Build lines of text before a section
-            if (m.length > 19 && m[20]) {
-                text += m[20];
+            // Build lines of text before a section (the final regex group)
+            if (m.length > 41 && m[42]) {
+                text += m[42];
                 continue
             }
 
@@ -30,7 +48,27 @@ const presenter = {
                 })
                 text = '';
             }
-            // Add the matched section
+
+            // handle json only (the second regex group)
+            if (m.length > 19 && m[20]) {
+                sections.push({
+                    name: m[23],
+                    contents: m[20] + m[24] + m[26],
+                    statusCode: "0",
+                })                
+                continue;
+            }
+            
+            // handle equals delimited section (the third regex group)
+            if (m.length > 29 && m[30]) {
+                sections.push({
+                    name: m[33],
+                    contents: m[30] + m[34] + m[36],
+                    statusCode: m[41],
+                })
+                continue;
+            }
+            // handle full two line section marker (the first regex group)
             sections.push({
                 name: m[4],
                 contents: m[1] + m[5] + m[9] + m[11] + m[16],
@@ -86,28 +124,48 @@ const presenter = {
     },
 
     renderSection: (section) => {
-        let renderedSection = ''
+        let rendered = { log: '', errors: '' }
         if (section.name && section.name !== '') {
-            let resultString = (section.statusCode && section.statusCode !== '0') ? 'failed' : 'success'
-            renderedSection += `<details><summary>${section.name} [${resultString}]</summary><strong>Begin section ${section.name}</strong><br>${presenter.renderLogData(section.contents)}<strong>End section ${section.name}</strong><br></details>`
+            const childRender = presenter.renderLogData(section.contents)
+            if (section.statusCode && section.statusCode !== '0') {
+                const anchorName = presenter.replaceSpacesWithUnderscores(section.name)
+                rendered.log = `<details id="${anchorName}"><summary>${section.name} [failed]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong id="${anchorName}_end">End section ${section.name}</strong><br></details>`;
+                rendered.errors = childRender.errors + `<a href="#${anchorName}_end" onclick='presenter.openError("${anchorName}");'>${section.name}</a><br>`;
+            } else {
+                rendered.log = `<details><summary>${section.name} [success]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong>End section ${section.name}</strong><br></details>`;
+                rendered.errors = childRender.errors;
+            }
+            
         } else if (section.contents) {
-            renderedSection += presenter.renderLogData(section.contents)
+            rendered = presenter.renderLogData(section.contents);
         } else if (section) {
-            renderedSection += section
+            rendered.log = section;
         }
-        return renderedSection
+        return rendered
     },
 
     renderLogData: (input) => {
-        let rendered = ''
+        let rendered = {log:'', errors:''}
         if (Array.isArray(input)) {
             input.forEach((section) => {
-                rendered += presenter.renderSection(section)
+                newSection = presenter.renderSection(section);
+                rendered.log += newSection.log;
+                rendered.errors += newSection.errors
             })
         } else {
-            rendered += presenter.renderSection(input)
+            rendered = presenter.renderSection(input);
         }
-        return rendered
+        return rendered;
+    },
+
+    openError: (id) => {
+        element = document.getElementById(id)
+        while (element) {
+            if (element.nodeName.toLowerCase() === 'details') {
+                element.open = true;
+            }
+            element = element.parentNode;
+        }
     }
 };
 

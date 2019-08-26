@@ -31,7 +31,7 @@ describe("injectElements", () => {
 
         expect(getElementById).toHaveBeenCalledWith("logData");
         expect(getElementById).toHaveBeenCalledWith("display");
-        expect(displayInnerHTML).toHaveBeenCalledWith("this is my log");
+        expect(displayInnerHTML).toHaveBeenCalledWith("<div><h1>Log</h1>this is my log</div>");
     });
 
     it("populates the display with decoded log data", () => {
@@ -40,7 +40,7 @@ describe("injectElements", () => {
 
         expect(getElementById).toHaveBeenCalledWith("logData");
         expect(getElementById).toHaveBeenCalledWith("display");
-        expect(displayInnerHTML).toHaveBeenCalledWith('this "is" my log');
+        expect(displayInnerHTML).toHaveBeenCalledWith('<div><h1>Log</h1>this "is" my log</div>');
 
     })
 });
@@ -133,7 +133,7 @@ describe("parseLogData", () => {
         })
     })
 
-    describe("handles single opsman log section", () => {
+    describe("handles double marker opsman log section", () => {
         let rawLogData
         beforeEach(async () => {
             rawLogData = await readFile('./spec/support/fixtures/an_opsman_section.log')
@@ -145,9 +145,44 @@ describe("parseLogData", () => {
             expect(parsed[0].name).toBe("Installing BOSH")
             expect(parsed[0].contents).toContain('{"type":"step_started","id":"bosh_product.deploying","description":"Installing BOSH"}')
             expect(parsed[0].contents).toContain('===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"')
+            expect(parsed[0].statusCode).toBe("2")
+            expect(parsed[0].contents).toContain('Succeeded')
+            expect(parsed[0].contents).toContain('===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 2')
+            expect(parsed[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
+        })
+    })
+
+    describe("handles json only marker opsman log section", () => {
+        let rawLogData
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/opsman_json_only_markers.log')
+        })
+
+        it("returns a single opsman section", () => {
+            let parsed = presenter.parseLogData(rawLogData)
+            expect(parsed.length).toBe(1)
+            expect(parsed[0].name).toBe("Installing BOSH")
+            expect(parsed[0].statusCode).toBe("0")
+            expect(parsed[0].contents).toContain('{"type":"step_started","id":"bosh_product.deploying","description":"Installing BOSH"}')
+            expect(parsed[0].contents).toContain('Succeeded')
+            expect(parsed[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
+        })
+    })
+
+    describe("handles equals only marker opsman log section", () => {
+        let rawLogData
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/opsman_equals_only_markers.log')
+        })
+
+        it("returns a single opsman section", () => {
+            let parsed = presenter.parseLogData(rawLogData)
+            expect(parsed.length).toBe(1)
+            expect(parsed[0].name).toBe("/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml")
+            expect(parsed[0].statusCode).toBe("0")
+            expect(parsed[0].contents).toContain('===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"')
             expect(parsed[0].contents).toContain('Succeeded')
             expect(parsed[0].contents).toContain('===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 0')
-            expect(parsed[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
         })
     })
 
@@ -166,6 +201,7 @@ describe("parseLogData", () => {
             expect(parsed[2].contents.length).toBe(4)
             expect(parsed[2].contents[0].contents).toBe("log data before ops man call\n\n")
             expect(parsed[2].contents[1].name).toBe("Installing BOSH")
+            expect(parsed[2].contents[1].statusCode).toBe("1")
             expect(parsed[2].contents[1].contents).toContain("Deployment manifest: '/var/tempest/workspaces/default/deployments/bosh.yml'")
             expect(parsed[2].contents[2].name).toBe("Uploading runtime config releases to the director")
             expect(parsed[2].contents[2].contents).toContain("Extracting release: Extracting release")
@@ -184,7 +220,7 @@ describe("renderLogData", () => {
         })
         it("returns just log text", () => {
             let rendered = presenter.renderLogData(sections)
-            expect(rendered).toBe("some log data")
+            expect(rendered.log).toBe("some log data")
         })
     })
     describe("renders a section", () => {
@@ -200,7 +236,7 @@ describe("renderLogData", () => {
         })
         it("returns a single details tag", () => {
             let rendered = presenter.renderLogData(sections)
-            expect(rendered).toBe("<details><summary>section [success]</summary><strong>Begin section section</strong><br>some log data<strong>End section section</strong><br></details>")
+            expect(rendered.log).toBe("<details><summary>section [success]</summary><strong>Begin section section</strong><br>some log data<strong>End section section</strong><br></details>")
         })
     })
     describe("renders nested sections", () => {
@@ -222,7 +258,44 @@ describe("renderLogData", () => {
         })
         it("returns nested details tags", () => {
             let rendered = presenter.renderLogData(sections)
-            expect(rendered).toBe("<details><summary>outer [success]</summary><strong>Begin section outer</strong><br><details><summary>inner [failed]</summary><strong>Begin section inner</strong><br>inner log data<strong>End section inner</strong><br></details><strong>End section outer</strong><br></details>")
+            expect(rendered.log).toBe('<details><summary>outer [success]</summary><strong>Begin section outer</strong><br><details id="inner"><summary>inner [failed]</summary><strong>Begin section inner</strong><br>inner log data<strong id="inner_end">End section inner</strong><br></details><strong>End section outer</strong><br></details>')
+            expect(rendered.errors.length).not.toBe(0)
+        })
+    })
+    describe("renders errors", () => {
+        let sections = []
+        beforeEach(() => {
+            sections.push({
+                name: "errors",
+                startMrl: '{"name":"errors"}',
+                contents: "an error",
+                statusCode: "1",
+                endMrl:'{"name":"errors"}'
+            })
+        })
+        it("returns error header and contents", () => {
+            let rendered = presenter.renderLogData(sections)
+            expect(rendered.log).toBe('<details id="errors"><summary>errors [failed]</summary><strong>Begin section errors</strong><br>an error<strong id="errors_end">End section errors</strong><br></details>')
+            expect(rendered.errors).toBe('<a href="#errors_end" onclick=\'presenter.openError("errors");\'>errors</a><br>')
+        })
+    })
+
+    describe("renders errors", () => {
+        let sections = []
+        beforeEach(() => {
+            sections.push({
+                name: "some errors",
+                startMrl: '{"name":"some errors"}',
+                contents: "an error",
+                statusCode: "1",
+                endMrl: '{"name":"some errors"}'
+            })
+        })
+        it("handles names with spaces (properly generates anchor names)", () => {
+            sections[0].name = "some errors"
+            let rendered = presenter.renderLogData(sections)
+            expect(rendered.log).toBe('<details id="some_errors"><summary>some errors [failed]</summary><strong>Begin section some errors</strong><br>an error<strong id="some_errors_end">End section some errors</strong><br></details>')
+            expect(rendered.errors).toBe('<a href="#some_errors_end" onclick=\'presenter.openError("some_errors");\'>some errors</a><br>')
         })
     })
 })
