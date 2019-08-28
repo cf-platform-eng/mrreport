@@ -1,0 +1,6 @@
+section-start: 'failure' MRL:{"type":"section-start","name":"failure","time":"2019-07-18T10:21:12.130296141-04:00"}
+section-start: 'actual configuration' MRL:{"type":"section-start","name":"actual configuration","time":"2019-07-18T10:21:12.130296141-04:00"}
+config
+section-end: 'actual configuration' result: 0 MRL:{"type":"section-end","name":"actual configuration","time":"2019-07-18T10:21:23.444186449-04:00"}
+failure
+section-end: 'failure' result: 1 MRL:{"type":"section-end","name":"failure","time":"2019-07-18T10:21:23.444186449-04:00"}
