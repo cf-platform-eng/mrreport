@@ -4,12 +4,16 @@ const presenter = {
         const display = document.getElementById('display')
         const logContents = presenter.renderLogData(presenter.parseLogData(presenter.decode(logData)));
 
+        let html = '';
         if (logContents.errors.length > 0) {
-            display.innerHTML = `<div><h1>Failures</h1>${logContents.errors}</div><div><h1>Log</h1>${logContents.log}</div>`
-        } else {
-            display.innerHTML = `<div><h1>Log</h1>${logContents.log}</div>`
+            html += `<div><h1>Failures</h1>${logContents.errors}</div>`;
         }
+        if (logContents.configuration.length > 0) {
+            html += `<div><h1>Configuration</h1>${logContents.configuration}</div>`;
+        }
+        html += `<div><h1>Log</h1>${logContents.log}</div>`;  
         
+        display.innerHTML = html;
     },
 
     decode: function (str) {
@@ -124,7 +128,7 @@ const presenter = {
     },
 
     renderSection: (section) => {
-        let rendered = { log: '', errors: '' }
+        let rendered = { log: '', errors: '', configuration: '' }
         if (section.name && section.name !== '') {
             const childRender = presenter.renderLogData(section.contents)
             if (section.statusCode && section.statusCode !== '0') {
@@ -134,6 +138,10 @@ const presenter = {
             } else {
                 rendered.log = `<details><summary>${section.name} [success]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong>End section ${section.name}</strong><br></details>`;
                 rendered.errors = childRender.errors;
+            }
+
+            if (section.name === 'actual configuration') {
+                rendered.configuration = rendered.log;
             }
             
         } else if (section.contents) {
@@ -145,12 +153,13 @@ const presenter = {
     },
 
     renderLogData: (input) => {
-        let rendered = {log:'', errors:''}
+        let rendered = { log: '', errors: '', configuration: ''}
         if (Array.isArray(input)) {
             input.forEach((section) => {
                 newSection = presenter.renderSection(section);
                 rendered.log += newSection.log;
-                rendered.errors += newSection.errors
+                rendered.errors += newSection.errors;
+                rendered.configuration += newSection.configuration;
             })
         } else {
             rendered = presenter.renderSection(input);
