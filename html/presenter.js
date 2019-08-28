@@ -135,13 +135,15 @@ const presenter = {
                 const anchorName = presenter.replaceSpacesWithUnderscores(section.name)
                 rendered.log = `<details id="${anchorName}"><summary>${section.name} [failed]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong id="${anchorName}_end">End section ${section.name}</strong><br></details>`;
                 rendered.errors = childRender.errors + `<a href="#${anchorName}_end" onclick='presenter.openError("${anchorName}");'>${section.name}</a><br>`;
+                rendered.configuration = childRender.configuration;
             } else {
                 rendered.log = `<details><summary>${section.name} [success]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong>End section ${section.name}</strong><br></details>`;
                 rendered.errors = childRender.errors;
+                rendered.configuration = childRender.configuration;
             }
 
             if (section.name === 'actual configuration') {
-                rendered.configuration = rendered.log;
+                rendered.configuration += rendered.log;
             }
             
         } else if (section.contents) {

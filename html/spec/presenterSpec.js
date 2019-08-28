@@ -57,8 +57,8 @@ describe("injectElements", () => {
             expect(args).toContain('<div><h1>Failures</h1><a href="#failure_end" onclick=\'presenter.openError("failure");\'>failure</a><br></div>')
             expect(args).toContain('<div><h1>Configuration</h1><details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>config')
             expect(args).toContain('<strong>End section actual configuration</strong><br></details></div>')
-            expect(args).toContain('<div><h1>Log</h1><details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>config')
-            expect(args).toContain('<strong>End section actual configuration</strong><br></details><details id="failure"><summary>failure [failed]</summary><strong>Begin section failure</strong><br>failure')
+            expect(args).toContain('<div><h1>Log</h1><details id="failure"><summary>failure [failed]</summary><strong>Begin section failure</strong><br><details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>config')
+            expect(args).toContain('<strong>End section actual configuration</strong><br></details>failure')
             expect(args).toContain('<strong id="failure_end">End section failure</strong><br></details></div>')
         })
 
