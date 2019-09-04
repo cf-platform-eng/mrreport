@@ -2,7 +2,7 @@ const presenter = {
     injectElements: () => {
         const logData = document.getElementById('logData').innerHTML
         const display = document.getElementById('display')
-        const logContents = presenter.renderLogData(presenter.parseLogData(presenter.decode(logData)).sections);
+        const logContents = presenter.renderLogData(presenter.parseLogData(presenter.decode(logData)));
 
         let html = '';
         if (logContents.errors.length > 0) {
@@ -146,7 +146,7 @@ const presenter = {
     renderSection: (section) => {
         let rendered = { log: '', errors: '', configuration: '' }
         if (section.name && section.name !== '') {
-            const childRender = presenter.renderLogData(section.contents)
+            const childRender = presenter.renderSections(section.contents)
             if (section.statusCode && section.statusCode !== '0') {
                 const anchorName = presenter.replaceSpacesWithUnderscores(section.name)
                 rendered.log = `<details id="${anchorName}"><summary>${section.name} [failed]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong id="${anchorName}_end">End section ${section.name}</strong><br></details>`;
@@ -163,24 +163,35 @@ const presenter = {
             }
             
         } else if (section.contents) {
-            rendered = presenter.renderLogData(section.contents);
+            rendered = presenter.renderSections(section.contents);
         } else if (section) {
             rendered.log = section;
         }
         return rendered
     },
 
-    renderLogData: (input) => {
-        let rendered = { log: '', errors: '', configuration: ''}
-        if (Array.isArray(input)) {
-            input.forEach((section) => {
+    renderSections: (sections) => {
+        let rendered = { log: '', errors: '', configuration: '' }
+        if (Array.isArray(sections)) {
+            sections.forEach((section) => {
                 newSection = presenter.renderSection(section);
                 rendered.log += newSection.log;
                 rendered.errors += newSection.errors;
                 rendered.configuration += newSection.configuration;
             })
         } else {
-            rendered = presenter.renderSection(input);
+            rendered = presenter.renderSection(sections);
+        }
+        return rendered;
+    },
+
+    renderLogData: (parsed) => {
+        let rendered = presenter.renderSections(parsed.sections);
+        if (parsed.dependencies.length > 0) {
+            dependencies = parsed.dependencies.reduce((accum, dependency) => {
+                return accum + dependency;
+            })
+            rendered.dependencies = `<details><summary>dependencies</summary>${dependencies}</details>`
         }
         return rendered;
     },

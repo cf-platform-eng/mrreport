@@ -245,21 +245,21 @@ describe("parseLogData", () => {
 
 describe("renderLogData", () => {
     describe("renders a single chunk of text", () => {
-        let sections = []
+        let parsed = { sections: [], dependencies: [] }
         beforeEach(() => {
-            sections.push({
+            parsed.sections.push({
                 contents: "some log data"
             })
         })
         it("returns just log text", () => {
-            let rendered = presenter.renderLogData(sections)
+            let rendered = presenter.renderLogData(parsed)
             expect(rendered.log).toBe("some log data")
         })
     })
     describe("renders a section", () => {
-        let sections = []
+        let parsed = { sections: [], dependencies: [] }
         beforeEach(() => {
-            sections.push({
+            parsed.sections.push({
                 name: "section",
                 startMrl: '{"name":"section}',
                 contents: "some log data",
@@ -268,14 +268,14 @@ describe("renderLogData", () => {
             })
         })
         it("returns a single details tag", () => {
-            let rendered = presenter.renderLogData(sections)
+            let rendered = presenter.renderLogData(parsed)
             expect(rendered.log).toBe("<details><summary>section [success]</summary><strong>Begin section section</strong><br>some log data<strong>End section section</strong><br></details>")
         })
     })
     describe("renders nested sections", () => {
-        let sections = []
+        let parsed = { sections: [], dependencies: [] }
         beforeEach(() => {
-            sections.push({
+            parsed.sections.push({
                 name: "outer",
                 startMrl: '{"name":"outer}',
                 contents: {
@@ -290,15 +290,15 @@ describe("renderLogData", () => {
             })
         })
         it("returns nested details tags", () => {
-            let rendered = presenter.renderLogData(sections)
+            let rendered = presenter.renderLogData(parsed)
             expect(rendered.log).toBe('<details><summary>outer [success]</summary><strong>Begin section outer</strong><br><details id="inner"><summary>inner [failed]</summary><strong>Begin section inner</strong><br>inner log data<strong id="inner_end">End section inner</strong><br></details><strong>End section outer</strong><br></details>')
             expect(rendered.errors.length).not.toBe(0)
         })
     })
     describe("renders errors", () => {
-        let sections = []
+        let parsed = { sections: [], dependencies: [] }
         beforeEach(() => {
-            sections.push({
+            parsed.sections.push({
                 name: "errors",
                 startMrl: '{"name":"errors"}',
                 contents: "an error",
@@ -307,16 +307,16 @@ describe("renderLogData", () => {
             })
         })
         it("returns error header and contents", () => {
-            let rendered = presenter.renderLogData(sections)
+            let rendered = presenter.renderLogData(parsed)
             expect(rendered.log).toBe('<details id="errors"><summary>errors [failed]</summary><strong>Begin section errors</strong><br>an error<strong id="errors_end">End section errors</strong><br></details>')
             expect(rendered.errors).toBe('<a href="#errors_end" onclick=\'presenter.openError("errors");\'>errors</a><br>')
         })
     })
 
     describe("renders errors when names have spaces", () => {
-        let sections = []
+        let parsed = { sections: [], dependencies: [] }
         beforeEach(() => {
-            sections.push({
+            parsed.sections.push({
                 name: "some errors",
                 startMrl: '{"name":"some errors"}',
                 contents: "an error",
@@ -325,15 +325,15 @@ describe("renderLogData", () => {
             })
         })
         it("handles names with spaces (properly generates anchor names)", () => {
-            let rendered = presenter.renderLogData(sections)
+            let rendered = presenter.renderLogData(parsed)
             expect(rendered.log).toBe('<details id="some_errors"><summary>some errors [failed]</summary><strong>Begin section some errors</strong><br>an error<strong id="some_errors_end">End section some errors</strong><br></details>')
             expect(rendered.errors).toBe('<a href="#some_errors_end" onclick=\'presenter.openError("some_errors");\'>some errors</a><br>')
         })
     })
     describe("renders configuration section", () => {
-        let sections = []
+        let parsed = { sections: [], dependencies: [] }
         beforeEach(() => {
-            sections.push({
+            parsed.sections.push({
                 name: "actual configuration",
                 startMrl: '{"name":"actual configuration"}',
                 contents: "some configuration",
@@ -342,9 +342,21 @@ describe("renderLogData", () => {
             })
         })
         it("pulls configuration section out", () => {
-            let rendered = presenter.renderLogData(sections)
+            let rendered = presenter.renderLogData(parsed)
             expect(rendered.log).toBe('<details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>some configuration<strong>End section actual configuration</strong><br></details>')
             expect(rendered.configuration).toBe('<details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>some configuration<strong>End section actual configuration</strong><br></details>')
+        })
+    })
+    describe("renders dependency section", () => {
+        let parsed = { sections: [], dependencies: [] }
+        beforeEach(() => {
+            parsed.dependencies.push("a dependency")
+        })
+        it("renders dependency section", () => {
+            let rendered = presenter.renderLogData(parsed)
+            expect(rendered.log).toBe('')
+            expect(rendered.configuration).toBe('')
+            expect(rendered.dependencies).toBe('<details><summary>dependencies</summary>a dependency</details>')
         })
     })
 })
