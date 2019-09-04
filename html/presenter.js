@@ -1,4 +1,8 @@
 const presenter = {
+    emitSection: (name, contents) => {
+        return `<div><h1>${name}</h1>${contents}</div>`
+    },
+
     injectElements: () => {
         const logData = document.getElementById('logData').innerHTML
         const display = document.getElementById('display')
@@ -6,12 +10,12 @@ const presenter = {
 
         let html = '';
         if (logContents.errors.length > 0) {
-            html += `<div><h1>Failures</h1>${logContents.errors}</div>`;
+            html += presenter.emitSection('Failures', logContents.errors);
         }
         if (logContents.configuration.length > 0) {
-            html += `<div><h1>Configuration</h1>${logContents.configuration}</div>`;
+            html += presenter.emitSection('Configuration', logContents.configuration);
         }
-        html += `<div><h1>Log</h1>${logContents.log}</div>`;  
+        html += presenter.emitSection('Log', logContents.log);
         
         display.innerHTML = html;
     },
@@ -143,17 +147,37 @@ const presenter = {
         return { sections, dependencies };
     },
 
+    emitSectionContents: (name, contents, endSectionID) => {
+        if (endSectionID) {
+            return `<strong>Begin section ${name}</strong><br>${contents}<strong id="${endSectionID}">End section ${name}</strong><br>`;
+        }
+        return `<strong>Begin section ${name}</strong><br>${contents}<strong>End section ${name}</strong><br>`;
+    },
+
+    emitFoldedSuccess: (name, contents) => {
+        return `<details><summary>${name} [success]</summary>${presenter.emitSectionContents(name, contents)}</details>`;
+    },
+
+    emitFoldedFailed: (name, contents) => {
+        const anchorName = presenter.replaceSpacesWithUnderscores(name)
+        return `<details id="${anchorName}"><summary>${name} [failed]</summary>${presenter.emitSectionContents(name, contents, anchorName + '_end')}</details>`;
+    },
+
+    emitFailureLink: (name) => {
+        const anchorName = presenter.replaceSpacesWithUnderscores(name)
+        return `<a href="#${anchorName}_end" onclick='presenter.openError("${anchorName}");'>${name}</a><br>`;
+    },
+
     renderSection: (section) => {
         let rendered = { log: '', errors: '', configuration: '' }
         if (section.name && section.name !== '') {
             const childRender = presenter.renderSections(section.contents)
             if (section.statusCode && section.statusCode !== '0') {
-                const anchorName = presenter.replaceSpacesWithUnderscores(section.name)
-                rendered.log = `<details id="${anchorName}"><summary>${section.name} [failed]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong id="${anchorName}_end">End section ${section.name}</strong><br></details>`;
-                rendered.errors = childRender.errors + `<a href="#${anchorName}_end" onclick='presenter.openError("${anchorName}");'>${section.name}</a><br>`;
+                rendered.log = presenter.emitFoldedFailed(section.name, childRender.log)
+                rendered.errors = childRender.errors + presenter.emitFailureLink(section.name)
                 rendered.configuration = childRender.configuration;
             } else {
-                rendered.log = `<details><summary>${section.name} [success]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong>End section ${section.name}</strong><br></details>`;
+                rendered.log = presenter.emitFoldedSuccess(section.name, childRender.log)
                 rendered.errors = childRender.errors;
                 rendered.configuration = childRender.configuration;
             }
