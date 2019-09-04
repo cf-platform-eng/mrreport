@@ -2,7 +2,7 @@ const presenter = {
     injectElements: () => {
         const logData = document.getElementById('logData').innerHTML
         const display = document.getElementById('display')
-        const logContents = presenter.renderLogData(presenter.parseLogData(presenter.decode(logData)));
+        const logContents = presenter.renderLogData(presenter.parseLogData(presenter.decode(logData)).sections);
 
         let html = '';
         if (logContents.errors.length > 0) {
@@ -26,6 +26,10 @@ const presenter = {
         return str.replace(' ', '_')
     },
 
+    isDependencyLine: function (str) {
+        return /^dependency:.*MRL:{.*}$/gm.test(str)
+    },
+
     parseOpsManSection: (input) => {
         // TODO: find way to compose these to make the regex easier to grok
         //let twoLineSection = '({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)'
@@ -35,6 +39,7 @@ const presenter = {
         //let regex = new RegExp('/' + twoLineSection + '|' + jsonSection + '|' + textLine + '/', "gm")
         
         let regex = /({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)|({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)((.|\n)*)({"type":"(.+)","id":"(\22)","description":"(.+)"}\n)|(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) "(\33)"; Duration: (.+); Exit Status: (.+)\n*)|(.*\n?)/gm;
+        let dependencies = [];
         let sections = [];
         let text = '';
         let m;
@@ -42,6 +47,9 @@ const presenter = {
             // Build lines of text before a section (the final regex group)
             if (m.length > 41 && m[42]) {
                 text += m[42];
+                if (presenter.isDependencyLine(m[42])) {
+                    dependencies.push(m[42])
+                }
                 continue
             }
 
@@ -87,12 +95,13 @@ const presenter = {
             })
         }
 
-        return sections;
+        return { sections, dependencies };
     },
 
     parseLogData: (input) => {
         let regex = /section-start: '(.+)' MRL:({.+}\n)((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+}\n)|(.*\n?)/gm;
         let sections = [];
+        let dependencies = [];
         let m;
 
         let text = '';
@@ -105,15 +114,20 @@ const presenter = {
 
             // Add a section for text before making a new section
             if (text !== '') {
-                sections = sections.concat(presenter.parseOpsManSection(text));
+                const subSection = presenter.parseOpsManSection(text)
+                sections = sections.concat(subSection.sections);
+                dependencies = dependencies.concat(subSection.dependencies);
                 text = '';
             }
+
+            const subSection = presenter.parseLogData(m[3]);
+            dependencies = dependencies.concat(subSection.dependencies);
 
             // Add the matched section
             sections.push({
                 name: m[1],
                 startMrl: m[2],
-                contents: presenter.parseLogData(m[3]),
+                contents: subSection.sections,
                 statusCode: m[6],
                 endMrl: m[7],
             })
@@ -121,10 +135,12 @@ const presenter = {
 
         // Add a section for any trailing text
         if (text !== '') {
-            sections = sections.concat(presenter.parseOpsManSection(text));
+            const subSection = presenter.parseOpsManSection(text)
+            sections = sections.concat(subSection.sections);
+            dependencies = dependencies.concat(subSection.dependencies);
         }
 
-        return sections;
+        return { sections, dependencies };
     },
 
     renderSection: (section) => {

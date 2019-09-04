@@ -1,0 +1,4 @@
+dependency: 'mrlog' version '0.0.11' MRL:{"type":"dependency","version":"0.0.11","name":"mrlog","time":"2019-08-16T21:19:30.250442549Z"}
+dependency: 'marman' version '0.1.4' MRL:{"type":"dependency","version":"0.1.4","name":"marman","time":"2019-08-16T21:19:34.523528521Z"}
+dependency: 'bosh-cli' version '5.5.1' MRL:{"type":"dependency","version":"5.5.1","name":"bosh-cli","time":"2019-08-16T21:20:00.246027635Z"}
+some log data

@@ -74,9 +74,9 @@ describe("parseLogData", () => {
 
         it("returns the whole log", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            expect(parsed.length).toBe(1);
-            expect(parsed[0].contents).toContain("Pulling amidos/dcind@sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561...")
-            expect(parsed[0].contents).toContain("sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561: Pulling from amidos/dcind")
+            expect(parsed.sections.length).toBe(1);
+            expect(parsed.sections[0].contents).toContain("Pulling amidos/dcind@sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561...")
+            expect(parsed.sections[0].contents).toContain("sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561: Pulling from amidos/dcind")
         })
     })
     describe("when there are sections", () => {
@@ -87,16 +87,16 @@ describe("parseLogData", () => {
 
         it("splits based on tags into array of objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            expect(parsed.length).toBe(6);
-            expect(parsed[0].contents).toBe("UUDDLRLRBA0\n\n")
-            expect(parsed[1].name).toBe("pull")
-            expect(parsed[2].name).toBe("pull2")
-            expect(parsed[2].contents.length).toBe(1)
-            expect(parsed[2].contents[0].contents).toBe("UUDDLRLRBA1\n")
-            expect(parsed[3].contents).toBe("\n")
-            expect(parsed[4].name).toBe("pull3")
-            expect(parsed[4].contents.length).toBe(1)
-            expect(parsed[4].contents[0].contents).toBe("UUDDLRLRBA2\n")
+            expect(parsed.sections.length).toBe(6);
+            expect(parsed.sections[0].contents).toBe("UUDDLRLRBA0\n\n")
+            expect(parsed.sections[1].name).toBe("pull")
+            expect(parsed.sections[2].name).toBe("pull2")
+            expect(parsed.sections[2].contents.length).toBe(1)
+            expect(parsed.sections[2].contents[0].contents).toBe("UUDDLRLRBA1\n")
+            expect(parsed.sections[3].contents).toBe("\n")
+            expect(parsed.sections[4].name).toBe("pull3")
+            expect(parsed.sections[4].contents.length).toBe(1)
+            expect(parsed.sections[4].contents[0].contents).toBe("UUDDLRLRBA2\n")
         });
     });
 
@@ -108,22 +108,22 @@ describe("parseLogData", () => {
 
         it("returns nested arrays of objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            expect(parsed.length).toBe(4);
-            expect(parsed[0].contents).toContain("UUDDLRLRBA0\n");
-            expect(parsed[1].contents.length).toBe(5)
-            expect(parsed[1].name).toBe("pull")
-            expect(parsed[1].statusCode).toBe("0")
-            expect(parsed[2].name).toBe("pull2")
-            expect(parsed[2].statusCode).toBe("2")
-            expect(parsed[3].contents).toContain("apk add jq")
-            expect(parsed[3].contents).toContain("fetch http://dl-cdn.alpinelinux.org/alpine/v3.10/main/x86_64/APKINDEX.tar.gz")
+            expect(parsed.sections.length).toBe(4);
+            expect(parsed.sections[0].contents).toContain("UUDDLRLRBA0\n");
+            expect(parsed.sections[1].contents.length).toBe(5)
+            expect(parsed.sections[1].name).toBe("pull")
+            expect(parsed.sections[1].statusCode).toBe("0")
+            expect(parsed.sections[2].name).toBe("pull2")
+            expect(parsed.sections[2].statusCode).toBe("2")
+            expect(parsed.sections[3].contents).toContain("apk add jq")
+            expect(parsed.sections[3].contents).toContain("fetch http://dl-cdn.alpinelinux.org/alpine/v3.10/main/x86_64/APKINDEX.tar.gz")
         });
 
         it("returns twice nested arrays of objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            expect(parsed.length).toBe(4);
-            expect(parsed[1].name).toBe("pull")
-            const pull = parsed[1]
+            expect(parsed.sections.length).toBe(4);
+            expect(parsed.sections[1].name).toBe("pull")
+            const pull = parsed.sections[1]
             expect(pull.contents.length).toBe(5);
             expect(pull.contents[1].name).toBe("nestedpull")
             expect(pull.contents[1].contents[0].contents).toContain("UUDDLRLRBA1");
@@ -135,9 +135,9 @@ describe("parseLogData", () => {
 
         it("returns strings between objects", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            expect(parsed.length).toBe(4);
-            expect(parsed[1].contents.length).toBe(5);
-            expect(parsed[1].contents[2].contents).toContain("hello from the middle");
+            expect(parsed.sections.length).toBe(4);
+            expect(parsed.sections[1].contents.length).toBe(5);
+            expect(parsed.sections[1].contents[2].contents).toContain("hello from the middle");
         });
     });
 
@@ -148,8 +148,8 @@ describe("parseLogData", () => {
         })
         it("returns last line when it doesn't finish with a newline", () => {
             let parsed = presenter.parseLogData(rawLogData);
-            expect(parsed.length).toBe(1);
-            expect(parsed[0].contents).toContain("sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561: Pulling from amidos/dcind")
+            expect(parsed.sections.length).toBe(1);
+            expect(parsed.sections[0].contents).toContain("sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561: Pulling from amidos/dcind")
         })
     })
 
@@ -162,14 +162,14 @@ describe("parseLogData", () => {
 
             it("returns a single opsman section", () => {
                 let parsed = presenter.parseLogData(rawLogData)
-                expect(parsed.length).toBe(1)
-                expect(parsed[0].name).toBe("Installing BOSH")
-                expect(parsed[0].contents).toContain('{"type":"step_started","id":"bosh_product.deploying","description":"Installing BOSH"}')
-                expect(parsed[0].contents).toContain('===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"')
-                expect(parsed[0].statusCode).toBe("2")
-                expect(parsed[0].contents).toContain('Succeeded')
-                expect(parsed[0].contents).toContain('===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 2')
-                expect(parsed[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
+                expect(parsed.sections.length).toBe(1)
+                expect(parsed.sections[0].name).toBe("Installing BOSH")
+                expect(parsed.sections[0].contents).toContain('{"type":"step_started","id":"bosh_product.deploying","description":"Installing BOSH"}')
+                expect(parsed.sections[0].contents).toContain('===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"')
+                expect(parsed.sections[0].statusCode).toBe("2")
+                expect(parsed.sections[0].contents).toContain('Succeeded')
+                expect(parsed.sections[0].contents).toContain('===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 2')
+                expect(parsed.sections[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
             })
         })
 
@@ -181,12 +181,12 @@ describe("parseLogData", () => {
 
             it("returns a single opsman section", () => {
                 let parsed = presenter.parseLogData(rawLogData)
-                expect(parsed.length).toBe(1)
-                expect(parsed[0].name).toBe("Installing BOSH")
-                expect(parsed[0].statusCode).toBe("0")
-                expect(parsed[0].contents).toContain('{"type":"step_started","id":"bosh_product.deploying","description":"Installing BOSH"}')
-                expect(parsed[0].contents).toContain('Succeeded')
-                expect(parsed[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
+                expect(parsed.sections.length).toBe(1)
+                expect(parsed.sections[0].name).toBe("Installing BOSH")
+                expect(parsed.sections[0].statusCode).toBe("0")
+                expect(parsed.sections[0].contents).toContain('{"type":"step_started","id":"bosh_product.deploying","description":"Installing BOSH"}')
+                expect(parsed.sections[0].contents).toContain('Succeeded')
+                expect(parsed.sections[0].contents).toContain('{"type":"step_finished","id":"bosh_product.deploying","description":"Installing BOSH"}')
             })
         })
 
@@ -198,12 +198,12 @@ describe("parseLogData", () => {
 
             it("returns a single opsman section", () => {
                 let parsed = presenter.parseLogData(rawLogData)
-                expect(parsed.length).toBe(1)
-                expect(parsed[0].name).toBe("/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml")
-                expect(parsed[0].statusCode).toBe("0")
-                expect(parsed[0].contents).toContain('===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"')
-                expect(parsed[0].contents).toContain('Succeeded')
-                expect(parsed[0].contents).toContain('===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 0')
+                expect(parsed.sections.length).toBe(1)
+                expect(parsed.sections[0].name).toBe("/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml")
+                expect(parsed.sections[0].statusCode).toBe("0")
+                expect(parsed.sections[0].contents).toContain('===== 2019-08-14 15:31:29 UTC Running "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"')
+                expect(parsed.sections[0].contents).toContain('Succeeded')
+                expect(parsed.sections[0].contents).toContain('===== 2019-08-14 15:32:21 UTC Finished "/usr/local/bin/bosh --no-color --non-interactive --tty create-env /var/tempest/workspaces/default/deployments/bosh.yml"; Duration: 52s; Exit Status: 0')
             })
         })
 
@@ -215,18 +215,29 @@ describe("parseLogData", () => {
 
             it("returns sections for the ops manager logs", () => {
                 let parsed = presenter.parseLogData(rawLogData)
-                expect(parsed.length).toBe(4)
-                expect(parsed[0].contents).toBe("this comes before any sections\n\n")
-                expect(parsed[1].name).toBe("first section (no opsman)")
-                expect(parsed[2].name).toBe("second section (with opsman)")
-                expect(parsed[2].contents.length).toBe(4)
-                expect(parsed[2].contents[0].contents).toBe("log data before ops man call\n\n")
-                expect(parsed[2].contents[1].name).toBe("Installing BOSH")
-                expect(parsed[2].contents[1].statusCode).toBe("1")
-                expect(parsed[2].contents[1].contents).toContain("Deployment manifest: '/var/tempest/workspaces/default/deployments/bosh.yml'")
-                expect(parsed[2].contents[2].name).toBe("Uploading runtime config releases to the director")
-                expect(parsed[2].contents[2].contents).toContain("Extracting release: Extracting release")
-                expect(parsed[2].contents[3].contents).toBe("\nlog data after ops man call\n")
+                expect(parsed.sections.length).toBe(4)
+                expect(parsed.sections[0].contents).toBe("this comes before any sections\n\n")
+                expect(parsed.sections[1].name).toBe("first section (no opsman)")
+                expect(parsed.sections[2].name).toBe("second section (with opsman)")
+                expect(parsed.sections[2].contents.length).toBe(4)
+                expect(parsed.sections[2].contents[0].contents).toBe("log data before ops man call\n\n")
+                expect(parsed.sections[2].contents[1].name).toBe("Installing BOSH")
+                expect(parsed.sections[2].contents[1].statusCode).toBe("1")
+                expect(parsed.sections[2].contents[1].contents).toContain("Deployment manifest: '/var/tempest/workspaces/default/deployments/bosh.yml'")
+                expect(parsed.sections[2].contents[2].name).toBe("Uploading runtime config releases to the director")
+                expect(parsed.sections[2].contents[2].contents).toContain("Extracting release: Extracting release")
+                expect(parsed.sections[2].contents[3].contents).toBe("\nlog data after ops man call\n")
+            })
+        })
+        describe("pulls out dependencies", () => {
+            let rawLogData
+            beforeEach(async () => {
+                rawLogData = await readFile('./spec/support/fixtures/dependencies.log')
+            })
+            it("returns dependencies", () => {
+                let parsed = presenter.parseLogData(rawLogData)
+                expect(parsed.sections.length).toBe(1)
+                expect(parsed.dependencies.length).toBe(3)
             })
         })
     })
@@ -319,7 +330,7 @@ describe("renderLogData", () => {
             expect(rendered.errors).toBe('<a href="#some_errors_end" onclick=\'presenter.openError("some_errors");\'>some errors</a><br>')
         })
     })
-    describe("renders dependency section", () => {
+    describe("renders configuration section", () => {
         let sections = []
         beforeEach(() => {
             sections.push({
@@ -330,7 +341,7 @@ describe("renderLogData", () => {
                 endMrl: '{"name":"actual configuration"}'
             })
         })
-        it("pulls depenency section out", () => {
+        it("pulls configuration section out", () => {
             let rendered = presenter.renderLogData(sections)
             expect(rendered.log).toBe('<details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>some configuration<strong>End section actual configuration</strong><br></details>')
             expect(rendered.configuration).toBe('<details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>some configuration<strong>End section actual configuration</strong><br></details>')
