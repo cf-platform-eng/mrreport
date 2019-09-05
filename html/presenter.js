@@ -1,4 +1,8 @@
 const presenter = {
+    emitSection: (name, contents) => {
+        return `<div><h1>${name}</h1>${contents}</div>`
+    },
+
     injectElements: () => {
         const logData = document.getElementById('logData').innerHTML
         const display = document.getElementById('display')
@@ -6,12 +10,15 @@ const presenter = {
 
         let html = '';
         if (logContents.errors.length > 0) {
-            html += `<div><h1>Failures</h1>${logContents.errors}</div>`;
+            html += presenter.emitSection('Failures', logContents.errors);
         }
         if (logContents.configuration.length > 0) {
-            html += `<div><h1>Configuration</h1>${logContents.configuration}</div>`;
+            html += presenter.emitSection('Configuration', logContents.configuration);
         }
-        html += `<div><h1>Log</h1>${logContents.log}</div>`;  
+        if (logContents.dependencies.length > 0) {
+            html += presenter.emitSection('Dependencies', logContents.dependencies);
+        }
+        html += presenter.emitSection('Log', logContents.log);
         
         display.innerHTML = html;
     },
@@ -26,6 +33,10 @@ const presenter = {
         return str.replace(' ', '_')
     },
 
+    isDependencyLine: function (str) {
+        return /^dependency:.*MRL:{.*}$/gm.test(str)
+    },
+
     parseOpsManSection: (input) => {
         // TODO: find way to compose these to make the regex easier to grok
         //let twoLineSection = '({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)'
@@ -35,6 +46,7 @@ const presenter = {
         //let regex = new RegExp('/' + twoLineSection + '|' + jsonSection + '|' + textLine + '/', "gm")
         
         let regex = /({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) Duration: (.+); Exit Status: (.+)\n)({"type":"(.+)","id":"(\3)","description":"(.+)"}\n?)|({"type":"(.+)","id":"(.+)","description":"(.+)"}\n)((.|\n)*)({"type":"(.+)","id":"(\22)","description":"(.+)"}\n)|(===== (.+) UTC (.+) "(.+)"\n)((.|\n)*)(===== (.+) UTC (.+) "(\33)"; Duration: (.+); Exit Status: (.+)\n*)|(.*\n?)/gm;
+        let dependencies = [];
         let sections = [];
         let text = '';
         let m;
@@ -42,6 +54,9 @@ const presenter = {
             // Build lines of text before a section (the final regex group)
             if (m.length > 41 && m[42]) {
                 text += m[42];
+                if (presenter.isDependencyLine(m[42])) {
+                    dependencies.push(m[42])
+                }
                 continue
             }
 
@@ -87,12 +102,13 @@ const presenter = {
             })
         }
 
-        return sections;
+        return { sections, dependencies };
     },
 
     parseLogData: (input) => {
         let regex = /section-start: '(.+)' MRL:({.+}\n)((.|\n)*)section-end: '(\1)' result: (\d+) MRL:({.+}\n)|(.*\n?)/gm;
         let sections = [];
+        let dependencies = [];
         let m;
 
         let text = '';
@@ -105,15 +121,20 @@ const presenter = {
 
             // Add a section for text before making a new section
             if (text !== '') {
-                sections = sections.concat(presenter.parseOpsManSection(text));
+                const subSection = presenter.parseOpsManSection(text)
+                sections = sections.concat(subSection.sections);
+                dependencies = dependencies.concat(subSection.dependencies);
                 text = '';
             }
+
+            const subSection = presenter.parseLogData(m[3]);
+            dependencies = dependencies.concat(subSection.dependencies);
 
             // Add the matched section
             sections.push({
                 name: m[1],
                 startMrl: m[2],
-                contents: presenter.parseLogData(m[3]),
+                contents: subSection.sections,
                 statusCode: m[6],
                 endMrl: m[7],
             })
@@ -121,23 +142,45 @@ const presenter = {
 
         // Add a section for any trailing text
         if (text !== '') {
-            sections = sections.concat(presenter.parseOpsManSection(text));
+            const subSection = presenter.parseOpsManSection(text)
+            sections = sections.concat(subSection.sections);
+            dependencies = dependencies.concat(subSection.dependencies);
         }
 
-        return sections;
+        return { sections, dependencies };
+    },
+
+    emitSectionContents: (name, contents, endSectionID) => {
+        if (endSectionID) {
+            return `<strong>Begin section ${name}</strong><br>${contents}<strong id="${endSectionID}">End section ${name}</strong><br>`;
+        }
+        return `<strong>Begin section ${name}</strong><br>${contents}<strong>End section ${name}</strong><br>`;
+    },
+
+    emitFoldedSuccess: (name, contents) => {
+        return `<details><summary>${name} [success]</summary>${presenter.emitSectionContents(name, contents)}</details>`;
+    },
+
+    emitFoldedFailed: (name, contents) => {
+        const anchorName = presenter.replaceSpacesWithUnderscores(name)
+        return `<details id="${anchorName}"><summary>${name} [failed]</summary>${presenter.emitSectionContents(name, contents, anchorName + '_end')}</details>`;
+    },
+
+    emitFailureLink: (name) => {
+        const anchorName = presenter.replaceSpacesWithUnderscores(name)
+        return `<a href="#${anchorName}_end" onclick='presenter.openError("${anchorName}");'>${name}</a><br>`;
     },
 
     renderSection: (section) => {
         let rendered = { log: '', errors: '', configuration: '' }
         if (section.name && section.name !== '') {
-            const childRender = presenter.renderLogData(section.contents)
+            const childRender = presenter.renderSections(section.contents)
             if (section.statusCode && section.statusCode !== '0') {
-                const anchorName = presenter.replaceSpacesWithUnderscores(section.name)
-                rendered.log = `<details id="${anchorName}"><summary>${section.name} [failed]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong id="${anchorName}_end">End section ${section.name}</strong><br></details>`;
-                rendered.errors = childRender.errors + `<a href="#${anchorName}_end" onclick='presenter.openError("${anchorName}");'>${section.name}</a><br>`;
+                rendered.log = presenter.emitFoldedFailed(section.name, childRender.log)
+                rendered.errors = childRender.errors + presenter.emitFailureLink(section.name)
                 rendered.configuration = childRender.configuration;
             } else {
-                rendered.log = `<details><summary>${section.name} [success]</summary><strong>Begin section ${section.name}</strong><br>${childRender.log}<strong>End section ${section.name}</strong><br></details>`;
+                rendered.log = presenter.emitFoldedSuccess(section.name, childRender.log)
                 rendered.errors = childRender.errors;
                 rendered.configuration = childRender.configuration;
             }
@@ -147,24 +190,35 @@ const presenter = {
             }
             
         } else if (section.contents) {
-            rendered = presenter.renderLogData(section.contents);
+            rendered = presenter.renderSections(section.contents);
         } else if (section) {
             rendered.log = section;
         }
         return rendered
     },
 
-    renderLogData: (input) => {
-        let rendered = { log: '', errors: '', configuration: ''}
-        if (Array.isArray(input)) {
-            input.forEach((section) => {
+    renderSections: (sections) => {
+        let rendered = { log: '', errors: '', configuration: '', dependencies: '' }
+        if (Array.isArray(sections)) {
+            sections.forEach((section) => {
                 newSection = presenter.renderSection(section);
                 rendered.log += newSection.log;
                 rendered.errors += newSection.errors;
                 rendered.configuration += newSection.configuration;
             })
         } else {
-            rendered = presenter.renderSection(input);
+            rendered = presenter.renderSection(sections);
+        }
+        return rendered;
+    },
+
+    renderLogData: (parsed) => {
+        let rendered = presenter.renderSections(parsed.sections);
+        if (parsed.dependencies.length > 0) {
+            dependencies = parsed.dependencies.reduce((accum, dependency) => {
+                return accum + dependency;
+            })
+            rendered.dependencies = `<details><summary>dependencies</summary>${dependencies}</details>`
         }
         return rendered;
     },
