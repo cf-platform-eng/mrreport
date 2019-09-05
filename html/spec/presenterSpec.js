@@ -7,6 +7,10 @@ document = {
     getElementById: (elementId) => {}
 };
 
+function sectionHTML(name, contents) {
+    return `<div><h1>${name}</h1>${contents}</div>`
+}
+
 describe("injectElements", () => {
     let logDataElement = {};
     let displayElement = {
@@ -31,7 +35,7 @@ describe("injectElements", () => {
 
         expect(getElementById).toHaveBeenCalledWith("logData");
         expect(getElementById).toHaveBeenCalledWith("display");
-        expect(displayInnerHTML).toHaveBeenCalledWith("<div><h1>Log</h1>this is my log</div>");
+        expect(displayInnerHTML).toHaveBeenCalledWith(sectionHTML("Log", "this is my log"));
     });
 
     it("populates the display with decoded log data", () => {
@@ -40,7 +44,7 @@ describe("injectElements", () => {
 
         expect(getElementById).toHaveBeenCalledWith("logData");
         expect(getElementById).toHaveBeenCalledWith("display");
-        expect(displayInnerHTML).toHaveBeenCalledWith('<div><h1>Log</h1>this "is" my log</div>');
+        expect(displayInnerHTML).toHaveBeenCalledWith(sectionHTML('Log', 'this "is" my log'));
     })
 
     describe("renders all sections properly", () => {
@@ -54,7 +58,7 @@ describe("injectElements", () => {
             expect(getElementById).toHaveBeenCalledWith("logData");
             expect(getElementById).toHaveBeenCalledWith("display");
             args = displayInnerHTML.calls.argsFor(0)[0];
-            expect(args).toContain('<div><h1>Failures</h1><a href="#failure_end" onclick=\'presenter.openError("failure");\'>failure</a><br></div>')
+            expect(args).toContain(sectionHTML('Failures', '<a href="#failure_end" onclick=\'presenter.openError("failure");\'>failure</a><br>'))
             expect(args).toContain('<div><h1>Configuration</h1><details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>config')
             expect(args).toContain('<strong>End section actual configuration</strong><br></details></div>')
             expect(args).toContain('<div><h1>Log</h1><details id="failure"><summary>failure [failed]</summary><strong>Begin section failure</strong><br><details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>config')
@@ -243,6 +247,24 @@ describe("parseLogData", () => {
     })
 });
 
+function successDetailsHTML(name, contents) {
+    return `<details><summary>${name} [success]</summary><strong>Begin section ${name}</strong><br>${contents}<strong>End section ${name}</strong><br></details>`;
+}
+
+function failedDetailsHTML(name, contents) {
+    const id = name.replace(' ', '_');
+    return `<details id="${id}"><summary>${name} [failed]</summary><strong>Begin section ${name}</strong><br>${contents}<strong id="${id}_end">End section ${name}</strong><br></details>`;
+}
+
+function errorsHTML(name) {
+    const id = name.replace(' ', '_');
+    return `<a href="#${id}_end" onclick=\'presenter.openError("${id}");\'>${name}</a><br>`;
+}
+
+function dependencyHTML(dependencies) {
+    return `<details><summary>dependencies</summary>${dependencies}</details>`;
+}
+
 describe("renderLogData", () => {
     describe("renders a single chunk of text", () => {
         let parsed = { sections: [], dependencies: [] }
@@ -269,7 +291,7 @@ describe("renderLogData", () => {
         })
         it("returns a single details tag", () => {
             let rendered = presenter.renderLogData(parsed)
-            expect(rendered.log).toBe("<details><summary>section [success]</summary><strong>Begin section section</strong><br>some log data<strong>End section section</strong><br></details>")
+            expect(rendered.log).toBe(successDetailsHTML('section', 'some log data'))
         })
     })
     describe("renders nested sections", () => {
@@ -291,7 +313,7 @@ describe("renderLogData", () => {
         })
         it("returns nested details tags", () => {
             let rendered = presenter.renderLogData(parsed)
-            expect(rendered.log).toBe('<details><summary>outer [success]</summary><strong>Begin section outer</strong><br><details id="inner"><summary>inner [failed]</summary><strong>Begin section inner</strong><br>inner log data<strong id="inner_end">End section inner</strong><br></details><strong>End section outer</strong><br></details>')
+            expect(rendered.log).toBe(successDetailsHTML('outer', failedDetailsHTML('inner', 'inner log data')));
             expect(rendered.errors.length).not.toBe(0)
         })
     })
@@ -308,8 +330,8 @@ describe("renderLogData", () => {
         })
         it("returns error header and contents", () => {
             let rendered = presenter.renderLogData(parsed)
-            expect(rendered.log).toBe('<details id="errors"><summary>errors [failed]</summary><strong>Begin section errors</strong><br>an error<strong id="errors_end">End section errors</strong><br></details>')
-            expect(rendered.errors).toBe('<a href="#errors_end" onclick=\'presenter.openError("errors");\'>errors</a><br>')
+            expect(rendered.log).toBe(failedDetailsHTML('errors', 'an error'));
+            expect(rendered.errors).toBe(errorsHTML('errors'));
         })
     })
 
@@ -326,8 +348,8 @@ describe("renderLogData", () => {
         })
         it("handles names with spaces (properly generates anchor names)", () => {
             let rendered = presenter.renderLogData(parsed)
-            expect(rendered.log).toBe('<details id="some_errors"><summary>some errors [failed]</summary><strong>Begin section some errors</strong><br>an error<strong id="some_errors_end">End section some errors</strong><br></details>')
-            expect(rendered.errors).toBe('<a href="#some_errors_end" onclick=\'presenter.openError("some_errors");\'>some errors</a><br>')
+            expect(rendered.log).toBe(failedDetailsHTML('some errors', 'an error'));
+            expect(rendered.errors).toBe(errorsHTML('some errors'));
         })
     })
     describe("renders configuration section", () => {
@@ -343,8 +365,8 @@ describe("renderLogData", () => {
         })
         it("pulls configuration section out", () => {
             let rendered = presenter.renderLogData(parsed)
-            expect(rendered.log).toBe('<details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>some configuration<strong>End section actual configuration</strong><br></details>')
-            expect(rendered.configuration).toBe('<details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>some configuration<strong>End section actual configuration</strong><br></details>')
+            expect(rendered.log).toBe(successDetailsHTML('actual configuration', 'some configuration'));
+            expect(rendered.configuration).toBe(successDetailsHTML('actual configuration', 'some configuration'));
         })
     })
     describe("renders dependency section", () => {
@@ -356,7 +378,7 @@ describe("renderLogData", () => {
             let rendered = presenter.renderLogData(parsed)
             expect(rendered.log).toBe('')
             expect(rendered.configuration).toBe('')
-            expect(rendered.dependencies).toBe('<details><summary>dependencies</summary>a dependency</details>')
+            expect(rendered.dependencies).toBe(dependencyHTML('a dependency'));
         })
     })
 })
