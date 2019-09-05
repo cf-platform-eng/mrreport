@@ -15,6 +15,9 @@ const presenter = {
         if (logContents.configuration.length > 0) {
             html += presenter.emitSection('Configuration', logContents.configuration);
         }
+        if (logContents.dependencies.length > 0) {
+            html += presenter.emitSection('Dependencies', logContents.dependencies);
+        }
         html += presenter.emitSection('Log', logContents.log);
         
         display.innerHTML = html;
@@ -195,7 +198,7 @@ const presenter = {
     },
 
     renderSections: (sections) => {
-        let rendered = { log: '', errors: '', configuration: '' }
+        let rendered = { log: '', errors: '', configuration: '', dependencies: '' }
         if (Array.isArray(sections)) {
             sections.forEach((section) => {
                 newSection = presenter.renderSection(section);
