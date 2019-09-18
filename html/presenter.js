@@ -30,11 +30,18 @@ const presenter = {
     },
 
     replaceSpacesWithUnderscores: function (str) {
-        return str.replace(' ', '_')
+        return str.replace(' ', '_');
     },
 
     isDependencyLine: function (str) {
-        return /^dependency:.*MRL:{.*}$/gm.test(str)
+        return /^dependency:.*MRL:{.*}$/gm.test(str);
+    },
+
+    hightlightFailures: function (str) {
+        if (/^failed.*|^error.*|^failure.*/gmi.test(str)) {
+            return `<strong><em>${str}</em></strong>`;
+        }
+        return str;
     },
 
     parseOpsManSection: (input) => {
@@ -53,7 +60,7 @@ const presenter = {
         while ((m = regex.exec(input)) !== null && m[0] !== '') {
             // Build lines of text before a section (the final regex group)
             if (m.length > 41 && m[42]) {
-                text += m[42];
+                text += presenter.hightlightFailures(m[42]);
                 if (presenter.isDependencyLine(m[42])) {
                     dependencies.push(m[42])
                 }
@@ -115,7 +122,7 @@ const presenter = {
         while ((m = regex.exec(input)) !== null && m[0] !== '') {
             // Build lines of text before a section
             if (m.length > 7 && m[8]) {
-                text += m[8];
+                text += presenter.hightlightFailures(m[8]);
                 continue
             }
 
