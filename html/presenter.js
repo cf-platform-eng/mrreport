@@ -170,7 +170,7 @@ const presenter = {
 
     emitFoldedFailed: (name, contents) => {
         const anchorName = presenter.replaceSpacesWithUnderscores(name)
-        return `<details id="${anchorName}"><summary>${name} [failed]</summary>${presenter.emitSectionContents(name, contents, anchorName + '_end')}</details>`;
+        return `<details id="${anchorName}"><summary>${name} <font color="red">[failed]</font></summary>${presenter.emitSectionContents(name, contents, anchorName + '_end')}</details>`;
     },
 
     emitFailureLink: (name) => {
