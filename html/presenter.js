@@ -39,7 +39,7 @@ const presenter = {
 
     hightlightFailures: function (str) {
         if (/^failed.*|^error.*|^failure.*/gmi.test(str)) {
-            return `<strong><em>${str}</em></strong>`;
+            return `<span class="failedline">${str}</span>`;
         }
         return str;
     },
@@ -170,7 +170,7 @@ const presenter = {
 
     emitFoldedFailed: (name, contents) => {
         const anchorName = presenter.replaceSpacesWithUnderscores(name)
-        return `<details id="${anchorName}"><summary>${name} <font color="red">[failed]</font></summary>${presenter.emitSectionContents(name, contents, anchorName + '_end')}</details>`;
+        return `<details id="${anchorName}"><summary><span class="failedfold">${name} [failed]</span></summary>${presenter.emitSectionContents(name, contents, anchorName + '_end')}</details>`;
     },
 
     emitFailureLink: (name) => {

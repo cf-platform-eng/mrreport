@@ -62,7 +62,7 @@ describe("injectElements", () => {
             expect(args).toContain('<div><h1>Configuration</h1><details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>config')
             expect(args).toContain('<strong>End section actual configuration</strong><br></details></div>')
             expect(args).toContain('<div><h1>Dependencies</h1><details><summary>dependencies</summary>dependency: \'dep\' version \'0.0.1\' MRL:{"type":"dependency","version":"0.0.1","name":"dep","time":"2019-08-16T21:19:34.523528521Z"}')
-            expect(args).toContain('</details></div><div><h1>Log</h1><details id="failure"><summary>failure <font color="red">[failed]</font></summary><strong>Begin section failure</strong><br>dependency: \'dep\' version \'0.0.1\' MRL:{"type":"dependency","version":"0.0.1","name":"dep","time":"2019-08-16T21:19:34.523528521Z"}')
+            expect(args).toContain('</details></div><div><h1>Log</h1><details id="failure"><summary><span class="failedfold">failure [failed]</span></summary><strong>Begin section failure</strong><br>dependency: \'dep\' version \'0.0.1\' MRL:{"type":"dependency","version":"0.0.1","name":"dep","time":"2019-08-16T21:19:34.523528521Z"}')
             expect(args).toContain('<details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>config')
             expect(args).toContain('<strong>End section actual configuration</strong><br></details>a failure')
             expect(args).toContain('<strong id="failure_end">End section failure</strong><br></details></div>')
@@ -72,8 +72,8 @@ describe("injectElements", () => {
 });
 
 function errorHightlight(str) {
-    return `<strong><em>${str}
-</em></strong>`
+    return `<span class="failedline">${str}
+</span>`
 }
 
 describe("parseLogData", () => {
@@ -275,7 +275,7 @@ function successDetailsHTML(name, contents) {
 
 function failedDetailsHTML(name, contents) {
     const id = name.replace(' ', '_');
-    return `<details id="${id}"><summary>${name} <font color="red">[failed]</font></summary><strong>Begin section ${name}</strong><br>${contents}<strong id="${id}_end">End section ${name}</strong><br></details>`;
+    return `<details id="${id}"><summary><span class="failedfold">${name} [failed]</span></summary><strong>Begin section ${name}</strong><br>${contents}<strong id="${id}_end">End section ${name}</strong><br></details>`;
 }
 
 function errorsHTML(name) {
