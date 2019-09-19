@@ -62,14 +62,19 @@ describe("injectElements", () => {
             expect(args).toContain('<div><h1>Configuration</h1><details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>config')
             expect(args).toContain('<strong>End section actual configuration</strong><br></details></div>')
             expect(args).toContain('<div><h1>Dependencies</h1><details><summary>dependencies</summary>dependency: \'dep\' version \'0.0.1\' MRL:{"type":"dependency","version":"0.0.1","name":"dep","time":"2019-08-16T21:19:34.523528521Z"}')
-            expect(args).toContain('</details></div><div><h1>Log</h1><details id="failure"><summary>failure [failed]</summary><strong>Begin section failure</strong><br>dependency: \'dep\' version \'0.0.1\' MRL:{"type":"dependency","version":"0.0.1","name":"dep","time":"2019-08-16T21:19:34.523528521Z"}')
+            expect(args).toContain('</details></div><div><h1>Log</h1><details id="failure"><summary><span class="failedfold">failure [failed]</span></summary><strong>Begin section failure</strong><br>dependency: \'dep\' version \'0.0.1\' MRL:{"type":"dependency","version":"0.0.1","name":"dep","time":"2019-08-16T21:19:34.523528521Z"}')
             expect(args).toContain('<details><summary>actual configuration [success]</summary><strong>Begin section actual configuration</strong><br>config')
-            expect(args).toContain('<strong>End section actual configuration</strong><br></details>failure')
+            expect(args).toContain('<strong>End section actual configuration</strong><br></details>a failure')
             expect(args).toContain('<strong id="failure_end">End section failure</strong><br></details></div>')
         })
 
     })
 });
+
+function errorHightlight(str) {
+    return `<span class="failedline">${str}
+</span>`
+}
 
 describe("parseLogData", () => {
     describe("when there are no sections", () => {
@@ -156,6 +161,21 @@ describe("parseLogData", () => {
             let parsed = presenter.parseLogData(rawLogData);
             expect(parsed.sections.length).toBe(1);
             expect(parsed.sections[0].contents).toContain("sha256:fb793c416c7aebaf56dfb936d4f09124666d25eb53ac4bd573877fc06dd6b561: Pulling from amidos/dcind")
+        })
+    })
+
+    describe("hightlights errors in log", () => {
+        let rawLogData
+        beforeEach(async () => {
+            rawLogData = await readFile('./spec/support/fixtures/failures.log')
+        })    
+        it("highlights error lines", () => {
+            let parsed = presenter.parseLogData(rawLogData);
+            expect(parsed.sections.length).toBe(1);
+            expect(parsed.sections[0].contents).toContain("A successful command 1")
+            expect(parsed.sections[0].contents).toContain(errorHightlight("Failed to run command 2"))
+            expect(parsed.sections[0].contents).toContain(errorHightlight("Error running command 3"))
+            expect(parsed.sections[0].contents).toContain(errorHightlight("Failure running command 4"))
         })
     })
 
@@ -255,7 +275,7 @@ function successDetailsHTML(name, contents) {
 
 function failedDetailsHTML(name, contents) {
     const id = name.replace(' ', '_');
-    return `<details id="${id}"><summary>${name} [failed]</summary><strong>Begin section ${name}</strong><br>${contents}<strong id="${id}_end">End section ${name}</strong><br></details>`;
+    return `<details id="${id}"><summary><span class="failedfold">${name} [failed]</span></summary><strong>Begin section ${name}</strong><br>${contents}<strong id="${id}_end">End section ${name}</strong><br></details>`;
 }
 
 function errorsHTML(name) {
