@@ -18,7 +18,7 @@ func (cmd *DependenciesCommand) Filter(in io.Reader, out io.WriteCloser) error {
 		return errors.Wrap(err, "error reading from stdin")
 	}
 
-	pattern, err := regexp.Compile("dependency: .*")
+	pattern, err := regexp.Compile(".*dependency:.*MRL:{.*}")
 	if err != nil { // !branch-not-tested we know of no way for this to occur.
 		return errors.Wrap(err, "error building the regex")
 	}
