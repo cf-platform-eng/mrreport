@@ -34,7 +34,7 @@ const presenter = {
     },
 
     isDependencyLine: function (str) {
-        return /^dependency:.*MRL:{.*}$/gm.test(str);
+        return /^.*dependency:.*MRL:{.*}$/gm.test(str);
     },
 
     hightlightFailures: function (str) {
