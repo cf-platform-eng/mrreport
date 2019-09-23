@@ -34,7 +34,7 @@ var _ = Describe("Dependencies", func() {
 				this is the log
 				Here is a dependency
 				dependency: 'uaac' version '4.1.0' MRL:{"type":"dependency","version":"4.1.0","name":"uaac","time":"2019-07-16T19:46:20.490884996Z"}
-				dependency: 'something-else' version '1.2.3' MRL:{"type":"dependency","version":"1.2.3","name":"something-else","time":"2019-07-16T19:46:20.490884996Z"}
+				binary dependency: 'something-else' version '1.2.3' MRL:{"type":"binary dependency","version":"1.2.3","name":"something-else","time":"2019-07-16T19:46:20.490884996Z"}
 				That was the dependency
 			`))
 		})
@@ -43,8 +43,10 @@ var _ = Describe("Dependencies", func() {
 			output := NewBuffer()
 			err := command.Filter(reader, output)
 			Expect(err).ToNot(HaveOccurred())
+			Expect(output).ShouldNot(Say("this is the log"))
+			Expect(output).ShouldNot(Say("Here is a dependency"))
 			Expect(output).To(Say(`dependency: 'uaac' version '4.1.0' MRL:{"type":"dependency","version":"4.1.0","name":"uaac","time":"2019-07-16T19:46:20.490884996Z"}\n`))
-			Expect(output).To(Say(`dependency: 'something-else' version '1.2.3' MRL:{"type":"dependency","version":"1.2.3","name":"something-else","time":"2019-07-16T19:46:20.490884996Z"}\n`))
+			Expect(output).To(Say(`binary dependency: 'something-else' version '1.2.3' MRL:{"type":"binary dependency","version":"1.2.3","name":"something-else","time":"2019-07-16T19:46:20.490884996Z"}\n`))
 		})
 	})
 
