@@ -4,7 +4,7 @@ Generates a web report from the log outputs of our test-cases
 
 ## Requirements
 
-* GO 1.12
+* GO 1.13
 * chromedriver 
   * MacOS: `brew install chromedriver`
 

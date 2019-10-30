@@ -6,13 +6,14 @@ import (
 	"bytes"
 	"os/exec"
 
+	"github.com/MakeNowJust/heredoc"
 	. "github.com/MakeNowJust/heredoc/dot"
 	. "github.com/bunniesandbeatings/goerkin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
-	"github.com/sclevine/agouti/matchers"
+	. "github.com/sclevine/agouti/matchers"
 )
 
 var _ = Describe("Generate HTML log", func() {
@@ -151,7 +152,11 @@ var _ = Describe("Generate HTML log", func() {
 			defer server.Close()
 
 			Expect(page.Navigate(server.URL)).To(Succeed())
-			Expect(page.Find("#display")).To(matchers.HaveText("Log\nthis is the log\nit has multiple lines"))
+			Expect(page.Find("#display")).To(HaveText(heredoc.Doc(
+				`Log
+				this is the log
+				it has multiple lines`,
+			)))
 		})
 
 		define.Then(`^the result is a html page displaying the end-script tag and the rest of the log$`, func() {
@@ -161,8 +166,10 @@ var _ = Describe("Generate HTML log", func() {
 			defer server.Close()
 
 			Expect(page.Navigate(server.URL)).To(Succeed())
-			Expect(page.Find("#display")).To(
-				matchers.HaveText("Log\n</script>This log tells you about some <pre id=\"not_in_doc\">html you need</pre>"))
+			Expect(page.Find("#display")).To(HaveText(heredoc.Doc(
+				`Log
+				</script>This log tells you about some <pre id="not_in_doc">html you need</pre>`,
+			)))
 		})
 
 		define.Then(`^the result is a html page displaying the failure section and the rest of the log$`, func() {
@@ -172,8 +179,18 @@ var _ = Describe("Generate HTML log", func() {
 			defer server.Close()
 
 			Expect(page.Navigate(server.URL)).To(Succeed())
-			Expect(page.Find("#display")).To(
-				matchers.HaveText("Failures\nan operation\nLog\nan operation [failed]\nBegin section an operation\n===== 2019-08-14 15:31:29 UTC Running \"an operation\"\nOperation failed\n===== 2019-08-14 15:32:21 UTC Finished \"an operation\"; Duration: 52s; Exit Status: 1\nEnd section an operation"))
+			Expect(page.Find("summary").Click()).To(Succeed())
+			Expect(page.Find("#display")).To(HaveText(heredoc.Doc(
+				`Failures
+				an operation
+				Log
+				an operation [failed]
+				Begin section an operation
+				===== 2019-08-14 15:31:29 UTC Running "an operation"
+				Operation failed
+				===== 2019-08-14 15:32:21 UTC Finished "an operation"; Duration: 52s; Exit Status: 1
+				End section an operation`,
+			)))
 		})
 
 		define.Then(`^the result is a html page displaying the failure links and the folded logs$`, func() {
@@ -185,7 +202,7 @@ var _ = Describe("Generate HTML log", func() {
 			Expect(page.Navigate(server.URL)).To(Succeed())
 			Expect(page.Find("#an_operation").Count()).To(Equal(1))
 			Expect(page.Find("#an_operation_end").Count()).To(Equal(1))
-			Expect(page.FindByXPath("//*[@id='an_operation'][@open]")).NotTo(matchers.BeFound())
+			Expect(page.FindByXPath("//*[@id='an_operation'][@open]")).NotTo(BeFound())
 		})
 
 		define.Then(`^the result is a html page displaying the nested failure links and the folded logs$`, func() {
@@ -197,7 +214,7 @@ var _ = Describe("Generate HTML log", func() {
 			Expect(page.Navigate(server.URL)).To(Succeed())
 			Expect(page.Find("#inner_operation").Count()).To(Equal(1))
 			Expect(page.Find("#inner_operation_end").Count()).To(Equal(1))
-			Expect(page.FindByXPath("//*[@id='inner_operation'][@open]")).NotTo(matchers.BeFound())
+			Expect(page.FindByXPath("//*[@id='inner_operation'][@open]")).NotTo(BeFound())
 		})
 
 		define.Then(`^when the failure link is clicked, the failure section is expanded$`, func() {
@@ -208,7 +225,7 @@ var _ = Describe("Generate HTML log", func() {
 
 			Expect(page.Navigate(server.URL)).To(Succeed())
 			Expect(page.Find("a").Click()).To(Succeed())
-			Expect(page.FindByXPath("//*[@id='an_operation'][@open]")).To(matchers.BeFound())
+			Expect(page.FindByXPath("//*[@id='an_operation'][@open]")).To(BeFound())
 		})
 
 		define.Then(`^when the nested failure link is clicked, the failure section and its parent are expanded$`, func() {
@@ -220,7 +237,7 @@ var _ = Describe("Generate HTML log", func() {
 			Expect(page.Navigate(server.URL)).To(Succeed())
 			Expect(page.Find("a").Click()).To(Succeed())
 			Expect(page.AllByXPath("//*[@open]").Count()).To(Equal(2))
-			Expect(page.FindByXPath("//*[@id='inner_operation'][@open]")).To(matchers.BeFound())
+			Expect(page.FindByXPath("//*[@id='inner_operation'][@open]")).To(BeFound())
 		})
 	})
 })
