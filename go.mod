@@ -9,7 +9,7 @@ require (
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/onsi/ginkgo v1.12.0
-	github.com/onsi/gomega v1.9.0
+	github.com/onsi/gomega v1.10.0
 	github.com/pkg/errors v0.9.1
 	github.com/sclevine/agouti v3.0.0+incompatible
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
