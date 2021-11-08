@@ -7,8 +7,8 @@ require (
 	github.com/bunniesandbeatings/goerkin v0.1.4-beta
 	github.com/gobuffalo/packr/v2 v2.8.1
 	github.com/jessevdk/go-flags v1.4.0
-	github.com/onsi/ginkgo v1.14.2
-	github.com/onsi/gomega v1.11.0
+	github.com/onsi/ginkgo v1.16.4
+	github.com/onsi/gomega v1.17.0
 	github.com/pkg/errors v0.9.1
 	github.com/sclevine/agouti v3.0.0+incompatible
 )
