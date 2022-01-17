@@ -9,7 +9,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^7.21.0",
+    "eslint": "^8.7.0",
     "eslint-plugin-jasmine": "^4.1.1",
     "jasmine": "^3.6.4"
   }
